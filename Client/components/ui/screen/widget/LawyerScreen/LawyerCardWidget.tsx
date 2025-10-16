@@ -58,7 +58,10 @@ const LawyerCardWidget = ({
   const rating = item?.rating || 0;
   const status = item?.lawyerStatus || "pending";
   const experience = item?.experience || 0;
-  const logoUri = item?.profilePicture || "https://via.placeholder.com/100";
+  const logoUri =
+  item?.profile?.profilePicture && item.profile.profilePicture.trim() !== ""
+    ? item.profile.profilePicture
+    : "https://via.placeholder.com/100";
   const tierName = item?.tier || "Community Ally";
   const tierData = getTierData(tierName);
 
@@ -105,17 +108,7 @@ const LawyerCardWidget = ({
         <View style={styles.gridRatingContainer}>{renderStars(rating)}</View>
 
         <View style={styles.gridButtonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => onChat && onChat(item)}
-          >
-            <Ionicons
-              name="chatbubble-ellipses-outline"
-              size={16}
-              color="#fff"
-            />
-            <Text style={styles.buttonText}>Chat</Text>
-          </TouchableOpacity>
+          
           <TouchableOpacity
             style={[styles.button, { backgroundColor: colors.secondary}]}
             onPress={() => onBook && onBook(item)}
@@ -178,17 +171,7 @@ const LawyerCardWidget = ({
           </View>
 
           <View style={styles.listButtonContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => onChat && onChat(item)}
-            >
-              <Ionicons
-                name="chatbubble-ellipses-outline"
-                size={16}
-                color="#fff"
-              />
-              <Text style={styles.buttonText}>Chat</Text>
-            </TouchableOpacity>
+            
             <TouchableOpacity
               style={[styles.button, { backgroundColor: colors.secondary}]}
               onPress={() => onBook && onBook(item)}

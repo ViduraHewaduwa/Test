@@ -48,12 +48,11 @@ export default function LawyerScreen() {
     }
 
     try {
-      console.log("fetch lawyers called");
+   
       const categoryParam =
         selectedCategory && selectedCategory !== "All" ? selectedCategory : "";
       const currentPage = isRefresh ? 1 : page;
 
-      console.log("search text : ", searchText);
       // Axios request
       const response = await getAllLawyers(
         searchText,
@@ -62,13 +61,15 @@ export default function LawyerScreen() {
         categoryParam
       );
       const data = response.data; // Axios automatically parses JSON
-      console.log("dataaaaa:", data);
+      console.log("dataaaaa:",data.data);
 
       if (data.message === "list" && data.data) {
         if (isRefresh || currentPage === 1) {
           setLawyers(data.data);
+          console.log("lawyersssss: ",lawyers)
         } else {
           setLawyers((prev) => [...prev, ...data.data]);
+          console.log("lawyerrrrrrrs: ",lawyers)
         }
 
         setTotalPages(data.pagination?.totalPages || 1);
@@ -117,7 +118,7 @@ export default function LawyerScreen() {
   // @ts-ignore
   const handleCardPress = (item) => {
     navigation.navigate("LawyerProfile", {
-      lawyerId: item.id, // or item.id depending on your backend
+      lawyerId: item._id, // or item.id depending on your backend
     });
   };
   return (
