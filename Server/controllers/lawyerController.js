@@ -1,8 +1,7 @@
-import Lawyer from "../models/Lawyer.js";
-import User from "../models/User.js";
-import  { updateLawyerPointsFromRating, calculateAverageRating } from "../utils/lawyerPoints.js";
-
-import jwt from "jsonwebtoken";
+const Lawyer = require("../models/Lawyer");
+const User = require("../models/User");
+const { updateLawyerPointsFromRating, calculateAverageRating } = require("../utils/lawyerPoints");
+const jwt = require("jsonwebtoken");
 
 // Generate JWT
 const generateToken = (id) => {
@@ -11,7 +10,7 @@ const generateToken = (id) => {
 
 // @desc    Register new lawyer
 // @route   POST /api/lawyers
-export const registerLawyer = async (req, res) => {
+const registerLawyer = async (req, res) => {
   try {
     const { firstName,lastName, email, password, contactNumber,licenseNumber,practiceArea,experience } = req.body;
 
@@ -42,7 +41,7 @@ export const registerLawyer = async (req, res) => {
 
 // @desc    Login lawyer
 // @route   POST /api/lawyers/login
-export const loginLawyer = async (req, res) => {
+const loginLawyer = async (req, res) => {
   try {
     const { email, password } = req.body;
     const lawyer = await Lawyer.findOne({ email });
@@ -64,7 +63,7 @@ export const loginLawyer = async (req, res) => {
 
 // @desc    Get lawyer profile
 // @route   GET /api/lawyers/profile
-export const getLawyerProfile = async (req, res) => {
+const getLawyerProfile = async (req, res) => {
   try {
     const lawyer = await Lawyer.findById(req.user.userId).select("-password");
     if (!lawyer) return res.status(404).json({ message: "Lawyer not found" });
@@ -78,7 +77,7 @@ export const getLawyerProfile = async (req, res) => {
 // @desc    Get all approved lawyers with optional category & pagination
 // @route   GET /api/lawyers
 
-export const getAllLawyers = async (req, res) => {
+const getAllLawyers = async (req, res) => {
   try {
     const { searchText = "", page = 1, size = 10, category = "" } = req.query;
 
@@ -133,7 +132,7 @@ export const getAllLawyers = async (req, res) => {
 };
 // @desc    Search lawyers
 // @route   GET /api/lawyers/search
-export const searchLawyers = async (req, res) => {
+const searchLawyers = async (req, res) => {
   try {
     const { q } = req.query;
     if (!q) return res.status(400).json({ message: "Search query is required" });
@@ -161,7 +160,7 @@ export const searchLawyers = async (req, res) => {
 // @desc    Submit a review for a lawyer
 // @route   POST /api/lawyers/:lawyerId/review
 // @access  Private (authenticated users)
-export const rateLawyer = async (req, res) => {
+const rateLawyer = async (req, res) => {
   try {
     const { lawyerId } = req.params;
     const { rating, comment } = req.body;
@@ -225,7 +224,7 @@ export const rateLawyer = async (req, res) => {
 // @desc    Get all reviews for a specific lawyer
 // @route   GET /api/lawyers/:lawyerId/reviews
 // @access  Public
-export const getLawyerReviews = async (req, res) => {
+const getLawyerReviews = async (req, res) => {
   try {
     const { lawyerId } = req.params;
 
@@ -263,7 +262,7 @@ export const getLawyerReviews = async (req, res) => {
 // @desc    Get lawyer tier details and total points
 // @route   GET /api/lawyers/:lawyerId/tier
 // @access  Public or Private depending on your auth
-export const getLawyerTier = async (req, res) => {
+const getLawyerTier = async (req, res) => {
   try {
     const { lawyerId } = req.params;
 
@@ -292,4 +291,15 @@ export const getLawyerTier = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  registerLawyer,
+  loginLawyer,
+  getLawyerProfile,
+  getAllLawyers,
+  searchLawyers,
+  rateLawyer,
+  getLawyerReviews,
+  getLawyerTier
 };
