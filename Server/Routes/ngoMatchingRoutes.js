@@ -3,7 +3,7 @@ const router = express.Router();
 const {
     MatchNGOFromConversation,
     GetNGORecommendationDetails
-} = require('../Controllers/ngoMatchingController');
+} = require('../controllers/ngoMatchingController');
 
 // Match NGOs based on conversation
 router.post('/match', MatchNGOFromConversation);

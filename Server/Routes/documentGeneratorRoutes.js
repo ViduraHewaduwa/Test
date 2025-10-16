@@ -4,7 +4,7 @@ const {
     GenerateDocument,
     GetDocumentTemplates,
     PreviewDocument
-} = require('../Controllers/DocumentGeneratorController');
+} = require('../controllers/DocumentGeneratorController');
 
 // Get all available document templates
 // GET /api/documents/generate/templates
