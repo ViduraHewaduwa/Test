@@ -32,7 +32,7 @@ const LawyerListWidget = ({
   const [isModalVisible, setModalVisible] = useState(false);
 
   const handleBook = (lawyer: any) => {
-    console.log("selected lawyerrr id : ",lawyer.id)
+    console.log("selected lawyerrr id : ",lawyer._id)
     setSelectedLawyer(lawyer);
     setModalVisible(true);
   };

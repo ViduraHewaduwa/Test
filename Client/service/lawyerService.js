@@ -19,7 +19,6 @@ export const getAllLawyers = async (searchText = "", page = 1, limit = 10, categ
     };
 
     console.log("params : ", params);
-
     
     // Remove undefined values to clean up the URL
     Object.keys(params).forEach(key => 

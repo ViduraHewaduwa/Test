@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const NGO = require('../Models/NgoModel'); // Add this import
 const jwt = require('jsonwebtoken');
+const LawyerProfile = require("../models/LawyerProfile");
 
 // Generate JWT Token with role information
 const generateToken = (userId, role) => {
@@ -401,39 +402,39 @@ const getAllowedUpdateFields = (role) => {
 // @desc    Get all lawyers
 // @route   GET /api/lawyers
 // @access  Public (or protect if needed)
+
+
 const getAllLawyers = async (req, res) => {
   try {
     const {
-      searchText = '',
+      searchText = "",
       page = 1,
       size = 10,
-      category = ''
+      category = "",
     } = req.query;
 
     const pageNumber = parseInt(page);
     const pageSize = parseInt(size);
 
-    // Initial filter for approved lawyers only
+    // Initial filter: only accepted lawyers
     const filter = {
-      role: 'lawyer',
-      lawyerStatus: 'accepted'
+      role: "lawyer",
+      lawyerStatus: "accepted",
     };
 
-    // Add category filter if provided
     if (category) {
       filter.specialization = category;
     }
 
-    // Add search filters
     if (searchText) {
       filter.$or = [
-        { firstName: { $regex: searchText, $options: 'i' } },
-        { lastName: { $regex: searchText, $options: 'i' } },
-        { specialization: { $regex: searchText, $options: 'i' } }
+        { firstName: { $regex: searchText, $options: "i" } },
+        { lastName: { $regex: searchText, $options: "i" } },
+        { specialization: { $regex: searchText, $options: "i" } },
       ];
     }
 
-    // Define tier priority (higher tiers come first)
+    // Define tier priority for sorting
     const tierPriority = {
       "Champion of Justice": 5,
       "Legal Mentor": 4,
@@ -445,51 +446,82 @@ const getAllLawyers = async (req, res) => {
     // Count total matching lawyers
     const total = await User.countDocuments(filter);
 
-     // Fetch all lawyers matching filter
+    // Fetch all matching lawyers (no pagination yet)
     const lawyers = await User.find(filter)
-      .select("-password"); // remove .lean()
+      .select("-password")
+      .lean();
 
-      // Sort manually based on tier priority (high → low), then newest first
+    // Sort by tier priority and createdAt
     const sortedLawyers = lawyers.sort((a, b) => {
       const tierA = tierPriority[a.tier] || 0;
       const tierB = tierPriority[b.tier] || 0;
-
-      // Higher tier first
       if (tierA !== tierB) return tierB - tierA;
-
-      // If same tier, sort by createdAt (newest first)
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
-    // Apply pagination after sorting
+
+    // Paginate
     const startIndex = (pageNumber - 1) * pageSize;
-    const paginatedLawyers = sortedLawyers.slice(
-      startIndex,
-      startIndex + pageSize
-    );
+    const paginatedLawyers = sortedLawyers.slice(startIndex, startIndex + pageSize);
+
+    // Fetch lawyer profiles for the paginated lawyers
+    const lawyerIds = paginatedLawyers.map(l => l._id);
+    const profiles = await LawyerProfile.find({ lawyer: { $in: lawyerIds } })
+      .select("-__v -updatedAt")
+      .lean();
+
+    // Combine lawyers with their profiles
+    const combined = paginatedLawyers.map(lawyer => {
+      const profile = profiles.find(p => p.lawyer.toString() === lawyer._id.toString());
+
+      // Construct profilePicture URL (same logic as getProfile)
+      let profilePictureUrl = null;
+      if (profile?.profilePicture) {
+        if (profile.profilePicture.startsWith("http://") || profile.profilePicture.startsWith("https://")) {
+          profilePictureUrl = profile.profilePicture;
+        } else if (profile.profilePicture.startsWith("/")) {
+          profilePictureUrl = `${req.protocol}://${req.get("host")}${profile.profilePicture}`;
+        } else {
+          profilePictureUrl = `${req.protocol}://${req.get("host")}/${profile.profilePicture}`;
+        }
+      }
+
+      return {
+        ...lawyer,
+        profile: profile
+          ? {
+              experience: profile.experience,
+              aboutMe: profile.aboutMe,
+              contactInfo: profile.contactInfo,
+              profilePicture: profilePictureUrl,
+            }
+          : null,
+      };
+    });
 
     const totalPages = Math.ceil(total / pageSize);
-    
 
     return res.status(200).json({
-      message: 'list',
-      data: lawyers.map((lawyer) => lawyer.toJSON()),
-      pagination: {
-        count: total,
-        currentPage: pageNumber,
-        totalPages,
-        hasNext: pageNumber < totalPages,
-        hasPrev: pageNumber > 1
-      }
-    });
+  message: "list",
+  data: combined,
+  pagination: {
+    count: total,
+    currentPage: pageNumber,
+    totalPages,
+    hasNext: pageNumber < totalPages,
+    hasPrev: pageNumber > 1,
+  },
+});
   } catch (error) {
-    console.error('Error fetching lawyers:', error);
+    console.error("❌ Error fetching lawyers:", error);
     return res.status(500).json({
-      message: 'error',
-      error: error.message
+      success: false,
+      message: "Server error",
+      error: error.message,
     });
   }
 };
 
+module.exports = { getAllLawyers };
 
 
 module.exports = {
