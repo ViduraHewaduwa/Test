@@ -51,14 +51,17 @@ const lawyerUpload = multer({
   }
 });
 
-// Local storage for documents (needed for OCR processing)
-const documentStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, documentsDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+// Cloudinary storage for documents (PDFs)
+const documentStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'legal_documents',
+        allowed_formats: ['pdf', 'jpg', 'png', 'jpeg', 'gif', 'bmp', 'tiff'],
+        resource_type: 'auto', // Automatically detect if it's image, raw, or video
+        format: async (req, file) => {
+            // Preserve original format
+            return file.mimetype === 'application/pdf' ? 'pdf' : undefined;
+        }
     }
 });
 

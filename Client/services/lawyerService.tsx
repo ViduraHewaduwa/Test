@@ -1,12 +1,11 @@
 import axios from "axios";
+import API_URL from '../config/api';
 
-// 👇 change to your backend URL
-const API_URL = "http://localhost:3000/api/lawyers"; 
-// If using device/emulator, use your machine's IP instead of localhost.
+const API_LAWYERS_URL = `${API_URL}/api/lawyers`;
 
 export const getAllLawyers = async () => {
   try {
-    const response = await axios.get(API_URL);
+    const response = await axios.get(API_LAWYERS_URL);
     console.log("response of lawyeers  : ", response);
     return response.data; // list of lawyers
   } catch (error) {

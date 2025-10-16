@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTTS } from '../../hooks/useTTS';
+import API_URL from '../../config/api';
 
 interface PostDetailModalProps {
   visible: boolean;
@@ -42,40 +43,8 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ visible, post, onClos
   const [showDeleteCommentModal, setShowDeleteCommentModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<{id: string, content: string} | null>(null);
 
-  // API URL configuration
-  const getApiUrls = () => {
-    if (Platform.OS === 'web') {
-      return [
-        'http://localhost:3000/api',
-        'http://127.0.0.1:3000/api',
-      ];
-    } else if (Platform.OS === 'android') {
-      return [
-        'http://10.0.2.2:3000/api',     // Android emulator
-        'http://10.4.2.1:3000/api',    // Your computer's IP
-        'http://localhost:3000/api',    // Fallback
-      ];
-    } else {
-      // iOS simulator
-      return [
-        'http://10.4.2.1:3000/api',    // Your computer's IP
-        'http://localhost:3000/api',    // iOS simulator
-      ];
-    }
-  };
-
-  const API_URLS = getApiUrls();
-
-  const [currentApiIndex, setCurrentApiIndex] = useState(0);
-  const BASE_URL = API_URLS[currentApiIndex];
-
-  // Try next API URL if current one fails
-  const tryNextApiUrl = () => {
-    const nextIndex = (currentApiIndex + 1) % API_URLS.length;
-    console.log(`[PostDetailModal] Trying next API URL: ${API_URLS[nextIndex]}`);
-    setCurrentApiIndex(nextIndex);
-    return nextIndex !== currentApiIndex; // Return false if we've tried all URLs
-  };
+  // Use the centralized API configuration
+  const BASE_URL = `${API_URL}/api`;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

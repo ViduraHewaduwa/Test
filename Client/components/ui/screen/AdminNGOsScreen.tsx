@@ -16,6 +16,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { COLOR } from '../../../constants/ColorPallet';
+import API_URL from '../../../config/api';
 
 interface AdminNGOsScreenProps {
   navigation?: any;
@@ -102,7 +103,7 @@ const AdminNGOsScreen: React.FC<AdminNGOsScreenProps> = ({ navigation }) => {
       console.log('Fetching NGOs...');
       
       const token = await AsyncStorage.getItem('adminToken');
-      const baseUrl = await AsyncStorage.getItem('adminApiUrl') || 'http://localhost:3000/api/admin';
+      const baseUrl = `${API_URL}/api/admin`;
       
       console.log('Token:', token ? 'exists' : 'missing');
       console.log('Base URL:', baseUrl);
@@ -203,7 +204,7 @@ const AdminNGOsScreen: React.FC<AdminNGOsScreenProps> = ({ navigation }) => {
         console.log('User confirmed, proceeding with status change...');
         
         try {
-          const baseUrl = 'http://localhost:3000/api';
+          const baseUrl = `${API_URL}/api`;
           const url = `${baseUrl}/ngo/ngo/${ngoId}/status`;
           
           console.log('Calling API:', url);
@@ -266,7 +267,7 @@ const AdminNGOsScreen: React.FC<AdminNGOsScreenProps> = ({ navigation }) => {
       async () => {
         try {
           const token = await AsyncStorage.getItem('adminToken');
-          const baseUrl = 'http://localhost:3000/api';
+          const baseUrl = `${API_URL}/api`;
           
           const response = await fetch(`${baseUrl}/ngo/ngo/${ngoId}`, {
             method: 'DELETE',
@@ -309,7 +310,7 @@ const AdminNGOsScreen: React.FC<AdminNGOsScreenProps> = ({ navigation }) => {
 
     try {
       const token = await AsyncStorage.getItem('adminToken');
-      const baseUrl = 'http://localhost:3000/api';
+      const baseUrl = `${API_URL}/api`;
       
       const response = await fetch(`${baseUrl}/ngo/ngo/${editingNGO._id}`, {
         method: 'PUT',
@@ -381,7 +382,7 @@ ${ngo.description}
     onStatusChange: (id: string, name: string, status: string) => void;
     onEdit: (ngo: NGO) => void;
     onDelete: (id: string, name: string) => void;
-    renderStars: (rating: number) => JSX.Element[];
+    renderStars: (rating: number) => React.ReactElement[];
   }> = ({ ngo, onViewDetails, onStatusChange, onEdit, onDelete, renderStars }) => {
     const [imageError, setImageError] = useState(false);
     

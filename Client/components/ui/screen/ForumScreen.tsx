@@ -26,6 +26,7 @@ import { useTheme } from '../../../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useTTS } from '../../../hooks/useTTS';
 import notificationService, { Notification } from '../../../services/notificationService';
+import API_URL from '../../../config/api';
 
 const { width } = Dimensions.get('window');
 
@@ -170,40 +171,8 @@ const ForumsScreen = () => {
         setIsHeaderSticky(scrollY > 300);
     };
 
-    // Multiple URL options for different environments
-    const getApiUrls = () => {
-        if (Platform.OS === 'web') {
-            return [
-                'http://localhost:3000/api',
-                'http://127.0.0.1:3000/api',
-            ];
-        } else if (Platform.OS === 'android') {
-            return [
-                'http://10.0.2.2:3000/api',     // Android emulator
-                'http://10.4.2.1:3000/api',    // Your computer's IP
-                'http://localhost:3000/api',    // Fallback
-            ];
-        } else {
-            // iOS simulator
-            return [
-                'http://10.4.2.1:3000/api',    // Your computer's IP
-                'http://localhost:3000/api',    // iOS simulator
-            ];
-        }
-    };
-
-    const API_URLS = getApiUrls();
-
-    const [currentApiIndex, setCurrentApiIndex] = useState(0);
-    const BASE_URL = API_URLS[currentApiIndex];
-
-    // Try different API URLs if current one fails
-    const tryNextApiUrl = () => {
-        const nextIndex = (currentApiIndex + 1) % API_URLS.length;
-        console.log(`Trying next API URL: ${API_URLS[nextIndex]}`);
-        setCurrentApiIndex(nextIndex);
-        return nextIndex !== currentApiIndex; // Return false if we've tried all URLs
-    };
+    // Use the centralized API configuration
+    const BASE_URL = `${API_URL}/api`;
 
     // API Functions
     const fetchPolls = async () => {
@@ -322,23 +291,13 @@ const ForumsScreen = () => {
         } catch (error) {
             console.error('Error fetching posts:', error);
 
-            // Try next API URL if available
-            if (tryNextApiUrl()) {
-                console.log('Trying next API URL...');
-                // Retry with next URL
-                return fetchPosts();
-            }
-
-            // All URLs failed, show error
+            // Show error to user
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             Alert.alert(
                 'Connection Error',
-                `Failed to load forum posts. Please check if the backend server is running.\n\nTried URLs: ${API_URLS.join(', ')}\n\nError: ${errorMessage}`,
+                `Failed to load forum posts. Please check if the backend server is running.\n\nAPI URL: ${BASE_URL}\n\nError: ${errorMessage}`,
                 [
-                    { text: 'Retry', onPress: () => {
-                            setCurrentApiIndex(0); // Reset to first URL
-                            fetchPosts();
-                        }},
+                    { text: 'Retry', onPress: () => fetchPosts() },
                     { text: 'OK' }
                 ]
             );

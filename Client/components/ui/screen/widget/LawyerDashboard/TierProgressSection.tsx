@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Animated, Image, TouchableOpacity, LayoutAnimation, UIManager, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../../../context/AuthContext";
 import { useTheme } from "../../../../../context/ThemeContext";
 import axios from "axios";
+import API_URL from "../../../../../config/api";
 
 // Enable layout animation on Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -47,7 +48,12 @@ const TierProgressSection = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/lawyers/${user.id}/tier`);
+        if (!user?.id) {
+          console.error('User ID not available');
+          return;
+        }
+        
+        const response = await axios.get(`${API_URL}/api/lawyers/${user.id}/tier`);
         const lawyer = response.data;
 
         setTotalPoints(lawyer.totalPoints || 0);
@@ -77,9 +83,9 @@ const TierProgressSection = () => {
     };
 
     fetchUserData();
-    intervalId = setInterval(fetchUserData, 50000);
+    const intervalId = setInterval(fetchUserData, 50000);
     return () => clearInterval(intervalId);
-  }, [user]);
+  }, [user, progress]);
 
   const pointsToNextTier = nextTierPoints - totalPoints;
 
@@ -200,10 +206,10 @@ const TierProgressSection = () => {
   );
 };
 
-const formatRuleName = (key) =>
+const formatRuleName = (key: string) =>
   key
     .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    .replace(/\b\w/g, (c: string) => c.toUpperCase());
 
 export default TierProgressSection;
 

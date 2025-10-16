@@ -1,4 +1,5 @@
 import axios, { AxiosProgressEvent } from 'axios';
+import API_URL from '@/config/api';
 import {
   Document,
   DocumentUploadResponse,
@@ -9,25 +10,8 @@ import {
   SupportedLanguage
 } from '@/types/document';
 
-// Configure base URL - automatically detect the best server URL
-const getApiBaseUrl = () => {
-  // For Expo development, detect environment and use appropriate URL
-  if (__DEV__) {
-    // Use localhost for web development, network IP for mobile
-    if (typeof window !== 'undefined' && window.location) {
-      // Web environment - use localhost
-      return 'http://localhost:3000/api';
-    } else {
-      // Mobile environment - use network IP
-      return 'http://10.164.198.42:3000/api';
-    }
-  }
-  
-  // For production, use your production API URL
-  return 'https://your-production-api.com/api';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+// Use the centralized API configuration
+const API_BASE_URL = `${API_URL}/api`;
 
 // Create axios instance
 const api = axios.create({
@@ -56,10 +40,10 @@ api.interceptors.response.use(
   (error) => {
     if (error.code === 'ERR_NETWORK') {
       console.error('Network Error: Unable to connect to server at', API_BASE_URL);
-      error.message = `Unable to connect to server at ${API_BASE_URL}. Please check if the backend server is running on port 3000.`;
+      error.message = `Unable to connect to server at ${API_BASE_URL}. Please check:\n1. Is the backend deployed on Railway?\n2. Visit ${API_BASE_URL.replace('/api', '')}/health to check if server is running\n3. Check Railway Dashboard for deployment status`;
     } else if (error.code === 'ECONNREFUSED') {
       console.error('Connection Refused: Server is not running at', API_BASE_URL);
-      error.message = `Server is not available at ${API_BASE_URL}. Please start the backend server on port 3000.`;
+      error.message = `Server is not available at ${API_BASE_URL}. The backend may not be deployed or is not responding.`;
     } else if (error.response?.status === 404) {
       console.error('API endpoint not found:', error.config?.url);
       error.message = 'API endpoint not found. Please check if the document routes are properly configured on the server.';

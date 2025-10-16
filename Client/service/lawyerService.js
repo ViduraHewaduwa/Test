@@ -1,8 +1,9 @@
 import axios from "axios";
+import API_URL from "../config/api";
 
-// Change this to your backend URL (localhost or LAN IP)
-const API_URL = "http://localhost:3000/api/auth/lawyers"; // Web
-const API_URL_LAWYER_PROFILE = "http://localhost:3000/api/lawyers";
+// Use the centralized API configuration
+const LAWYER_AUTH_API_URL = `${API_URL}/api/auth/lawyers`;
+const API_URL_LAWYER_PROFILE = `${API_URL}/api/lawyers`;
 
 
 
@@ -27,7 +28,7 @@ export const getAllLawyers = async (searchText = "", page = 1, limit = 10, categ
     
     console.log("API Request params:", params); // Debug log
     
-    const response = await axios.get(API_URL, { params });
+    const response = await axios.get(LAWYER_AUTH_API_URL, { params });
     return response;
   } catch (error) {
     console.error("Error fetching lawyers:", error.response?.data || error.message);
@@ -37,7 +38,7 @@ export const getAllLawyers = async (searchText = "", page = 1, limit = 10, categ
 // Search lawyers by query
 export const searchLawyers = async (query) => {
   try {
-    const response = await axios.get(`${API_URL}/search`, { params: { q: query } });
+    const response = await axios.get(`${LAWYER_AUTH_API_URL}/search`, { params: { q: query } });
     return response.data;
   } catch (error) {
     console.error("Error searching lawyers:", error.response?.data || error.message);

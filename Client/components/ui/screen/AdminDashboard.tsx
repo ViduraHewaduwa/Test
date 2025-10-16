@@ -13,6 +13,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { COLOR } from '../../../constants/ColorPallet';
+import API_URL from '../../../config/api';
 
 interface AdminDashboardProps {
   navigation?: any;
@@ -52,7 +53,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigation }) => {
   const fetchDashboardStats = async () => {
     try {
       const token = await AsyncStorage.getItem('adminToken');
-      const baseUrl = await AsyncStorage.getItem('adminApiUrl') || 'http://localhost:3000/api/admin';
+      const baseUrl = `${API_URL}/api/admin`;
       
       if (!token) {
         throw new Error('No admin token found');

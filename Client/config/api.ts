@@ -1,14 +1,17 @@
 // API Configuration for different environments
 const isDevelopment = __DEV__;
 
-// 🔥 IMPORTANT: Replace this with your actual Railway URL after deployment
-// Example: 'https://legalbridge-production.up.railway.app'
-const PRODUCTION_API_URL = 'YOUR_RAILWAY_URL_HERE'; // ⚠️ CHANGE THIS!
+// ✅ Your Railway Production URL
+const PRODUCTION_API_URL = 'https://test-production-f7c7.up.railway.app';
 
+// For local development (when server is running on your computer)
 const DEVELOPMENT_API_URL = 'http://localhost:3000';
 
-// Automatically switch between dev and production
-const API_URL = isDevelopment ? DEVELOPMENT_API_URL : PRODUCTION_API_URL;
+// 🚀 Currently using Railway URL for mobile app
+const API_URL = PRODUCTION_API_URL;
+
+// 📝 To use auto-switching (uncomment when testing locally):
+// const API_URL = isDevelopment ? DEVELOPMENT_API_URL : PRODUCTION_API_URL;
 
 export default API_URL;
 

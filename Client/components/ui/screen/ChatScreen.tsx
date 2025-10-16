@@ -20,8 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { COLOR } from '@/constants/ColorPallet';
 import { LinearGradient } from 'expo-linear-gradient';
-
-const API_URL = 'http://localhost:3000'; // Update with your server IP
+import API_URL from '@/config/api';
 
 const ChatScreen = () => {
     const navigation = useNavigation();

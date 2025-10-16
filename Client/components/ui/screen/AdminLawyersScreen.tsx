@@ -12,9 +12,11 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { COLOR } from "../../../constants/ColorPallet";
+import API_URL from "../../../config/api";
 
 interface Lawyer {
   id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   specialization: string;
@@ -37,7 +39,7 @@ const AdminManageLawyers = ({ navigation }: any) => {
   const fetchLawyers = async () => {
     try {
       const token = await AsyncStorage.getItem("adminToken");
-      const baseUrl = (await AsyncStorage.getItem("adminApiUrl")) || "http://localhost:3000/api/admin";
+      const baseUrl = `${API_URL}/api/admin`;
 
       const response = await fetch(`${baseUrl}/lawyers`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -61,7 +63,7 @@ const AdminManageLawyers = ({ navigation }: any) => {
   const updateLawyerStatus = async (id: string, newStatus: string) => {
     try {
       const token = await AsyncStorage.getItem("adminToken");
-      const baseUrl = (await AsyncStorage.getItem("adminApiUrl")) || "http://localhost:3000/api/admin";
+      const baseUrl = `${API_URL}/api/admin`;
 
       console.log("lawyer id : ", id)
       const response = await fetch(`${baseUrl}/lawyers/${id}/status`, {
@@ -95,7 +97,7 @@ const AdminManageLawyers = ({ navigation }: any) => {
         onPress: async () => {
           try {
             const token = await AsyncStorage.getItem("adminToken");
-            const baseUrl = (await AsyncStorage.getItem("adminApiUrl")) || "http://localhost:3000/api/admin";
+            const baseUrl = `${API_URL}/api/admin`;
 
             const response = await fetch(`${baseUrl}/lawyers/${id}`, {
               method: "DELETE",

@@ -2,12 +2,19 @@ const Document = require('../models/Document');
 const geminiService = require('../Services/geminiService');
 const fs = require('fs').promises;
 const path = require('path');
+const cloudinary = require('../config/cloudinary');
+const axios = require('axios');
 
-// Helper function to convert file path to HTTP URL
+// Helper function to get file URL (now supports Cloudinary URLs)
 const getFileUrl = (filepath, req) => {
   if (!filepath) return null;
   
-  // Extract the relative path from uploads directory
+  // If it's already a full URL (Cloudinary), return as-is
+  if (filepath.startsWith('http://') || filepath.startsWith('https://')) {
+    return filepath;
+  }
+  
+  // Legacy: Extract the relative path from uploads directory
   const relativePath = filepath.replace(/\\/g, '/').replace(/.*uploads\//, 'uploads/');
   
   // Create full HTTP URL
@@ -205,6 +212,8 @@ class DocumentController {
    * POST /api/documents/explain
    */
   async explainDocument(req, res) {
+    let tempFilePath = null;
+    
     try {
       if (!req.file) {
         return res.status(400).json({
@@ -215,11 +224,13 @@ class DocumentController {
 
       // Validate file is PDF
       if (req.file.mimetype !== 'application/pdf') {
-        // Clean up uploaded file
-        try {
-          await fs.unlink(req.file.path);
-        } catch (cleanupError) {
-          // Silent cleanup error
+        // Clean up from Cloudinary if uploaded
+        if (req.file.filename) {
+          try {
+            await cloudinary.uploader.destroy(req.file.filename, { resource_type: 'raw' });
+          } catch (cleanupError) {
+            console.error('Cloudinary cleanup error:', cleanupError);
+          }
         }
         
         return res.status(400).json({
@@ -249,11 +260,13 @@ class DocumentController {
 
       // Check if Gemini AI is configured
       if (!geminiService.isConfigured()) {
-        // Clean up uploaded file
-        try {
-          await fs.unlink(req.file.path);
-        } catch (cleanupError) {
-          // Silent cleanup error
+        // Clean up from Cloudinary
+        if (req.file.filename) {
+          try {
+            await cloudinary.uploader.destroy(req.file.filename, { resource_type: 'raw' });
+          } catch (cleanupError) {
+            console.error('Cloudinary cleanup error:', cleanupError);
+          }
         }
         
         return res.status(503).json({
@@ -262,22 +275,40 @@ class DocumentController {
         });
       }
 
+      // Download PDF from Cloudinary to temporary location for processing
+      const cloudinaryUrl = req.file.path; // This is the Cloudinary URL
+      tempFilePath = path.join(__dirname, '../uploads/documents', `temp-${Date.now()}.pdf`);
+      
+      try {
+        // Ensure temp directory exists
+        const tempDir = path.dirname(tempFilePath);
+        await fs.mkdir(tempDir, { recursive: true });
+        
+        // Download PDF from Cloudinary
+        const response = await axios({
+          method: 'get',
+          url: cloudinaryUrl,
+          responseType: 'arraybuffer'
+        });
+        
+        await fs.writeFile(tempFilePath, response.data);
+      } catch (downloadError) {
+        console.error('Error downloading PDF from Cloudinary:', downloadError);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to process uploaded PDF'
+        });
+      }
+
       // Extract text from PDF
       let documentText;
       try {
-        documentText = await geminiService.extractTextFromPDF(req.file.path);
+        documentText = await geminiService.extractTextFromPDF(tempFilePath);
         
         if (!documentText || documentText.trim().length === 0) {
           throw new Error('No text could be extracted from the PDF');
         }
       } catch (extractError) {
-        // Clean up uploaded file
-        try {
-          await fs.unlink(req.file.path);
-        } catch (cleanupError) {
-          // Silent cleanup error
-        }
-        
         return res.status(400).json({
           success: false,
           message: 'Failed to extract text from PDF: ' + extractError.message

@@ -17,8 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { COLOR } from '@/constants/ColorPallet';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-
-const API_URL = 'http://localhost:3000';
+import API_URL from '@/config/api';
 
 // @ts-ignore
 const DocumentGeneratorScreen = ({ navigation }) => {

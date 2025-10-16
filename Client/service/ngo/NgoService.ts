@@ -1,11 +1,12 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import API_URL from '../../config/api';
 
-const API_URL = 'http://localhost:3000/api/ngo';
+const NGO_API_URL = `${API_URL}/api/ngo`;
 
 // Create axios instance
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: NGO_API_URL,
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
@@ -49,7 +50,7 @@ class NgoService {
         category?: string;
     }) {
         try {
-            const response = await api.get('/ngo/all', { params });
+            const response = await api.get(`/all`, { params });
             return {
                 success: true,
                 data: response.data.data,
@@ -64,7 +65,7 @@ class NgoService {
     // Get NGO by ID
     async getNgoById(id: string) {
         try {
-            const response = await api.get(`/ngo/${id}`);
+            const response = await api.get(`/${id}`);
             return {
                 success: true,
                 data: response.data.data
@@ -78,7 +79,7 @@ class NgoService {
     // Update NGO
     async updateNgo(id: string, data: any) {
         try {
-            const response = await api.put(`/ngo/${id}`, data);
+            const response = await api.put(`/${id}`, data);
             return {
                 success: true,
                 data: response.data.data
@@ -94,7 +95,7 @@ class NgoService {
         try {
             const token = await AsyncStorage.getItem('authToken');
             const response = await axios.put(
-                `${API_URL}/ngo/${id}`,
+                `${NGO_API_URL}/${id}`,
                 formData,
                 {
                     headers: {
@@ -117,7 +118,7 @@ class NgoService {
     // Get top rated NGOs
     async getTopRatedNgos(limit: number = 5) {
         try {
-            const response = await api.get('/ngo/top-ratings', {
+            const response = await api.get(`/top-ratings`, {
                 params: { limit }
             });
             return {
@@ -133,7 +134,7 @@ class NgoService {
     // Get NGOs by category
     async getNgosByCategory(category: string, limit: number = 10) {
         try {
-            const response = await api.get(`/ngo/category/${category}`, {
+            const response = await api.get(`/category/${category}`, {
                 params: { limit }
             });
             return {
@@ -149,7 +150,7 @@ class NgoService {
     // Update NGO status (admin only)
     async updateNgoStatus(id: string, status: 'active' | 'inactive') {
         try {
-            const response = await api.patch(`/ngo/${id}/status`, { status });
+            const response = await api.patch(`/${id}/status`, { status });
             return {
                 success: true,
                 data: response.data.data
@@ -163,7 +164,7 @@ class NgoService {
     // Delete NGO (admin only)
     async deleteNgo(id: string) {
         try {
-            const response = await api.delete(`/ngo/${id}`);
+            const response = await api.delete(`/${id}`);
             return {
                 success: true,
                 data: response.data.data
@@ -176,7 +177,7 @@ class NgoService {
     async uploadNgoLogo(ngoId: string, formData: FormData) {
         try {
             const response = await axios.put(
-                `${API_URL}/ngo/${ngoId}/logo`,
+                `${NGO_API_URL}/${ngoId}/logo`,
                 formData,
                 {
                     headers: {
@@ -194,7 +195,7 @@ class NgoService {
     async uploadNgoImages(ngoId: string, formData: FormData) {
         try {
             const response = await axios.post(
-                `${API_URL}/ngo/${ngoId}/images`,
+                `${NGO_API_URL}/${ngoId}/images`,
                 formData,
                 {
                     headers: {
@@ -212,7 +213,7 @@ class NgoService {
     async deleteNgoImage(ngoId: string, imageUrl: string) {
         try {
             const response = await axios.delete(
-                `${API_URL}/ngo/${ngoId}/images`,
+                `${NGO_API_URL}/${ngoId}/images`,
                 {
                     data: { imageUrl }
                 }
@@ -227,7 +228,7 @@ class NgoService {
     async deleteAllNgoImages(ngoId: string) {
         try {
             const response = await axios.delete(
-                `${API_URL}/ngo/${ngoId}/images/all`
+                `${NGO_API_URL}/${ngoId}/images/all`
             );
             return { success: true, data: response.data };
         } catch (error: any) {
