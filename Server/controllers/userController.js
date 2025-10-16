@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const NGO = require('../Models/NgoModel'); // Add this import
+const NGO = require('../models/NgoModel'); // Add this import
 const jwt = require('jsonwebtoken');
 
 // Generate JWT Token with role information

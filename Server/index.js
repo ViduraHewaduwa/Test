@@ -34,17 +34,34 @@ const createRequiredDirectories = () => {
 createRequiredDirectories();
 // ==================== END DIRECTORY CREATION ====================
 
-// CORS Configuration
+// CORS Configuration - Flexible for Railway deployment
+const allowedOrigins = [
+  'http://localhost:3000', 'http://127.0.0.1:3000',
+  'http://10.0.2.2:3000', 'http://10.4.2.1:3000',
+  'http://localhost:8081', 'http://127.0.0.1:8081',
+  'http://localhost:19006', 'http://127.0.0.1:19006',
+  'http://localhost:8080', 'http://127.0.0.1:8080',
+  'http://10.0.2.2:8081', 'http://10.4.2.1:8081',
+  'http://10.164.198.42:8081', 'http://10.164.198.42:3000'
+];
+
+// Add custom origins from environment variable (for Railway deployment)
+if (process.env.ALLOWED_ORIGINS) {
+  const customOrigins = process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim());
+  allowedOrigins.push(...customOrigins);
+}
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000', 'http://127.0.0.1:3000',
-    'http://10.0.2.2:3000', 'http://10.4.2.1:3000',
-    'http://localhost:8081', 'http://127.0.0.1:8081',
-    'http://localhost:19006', 'http://127.0.0.1:19006',
-    'http://localhost:8080', 'http://127.0.0.1:8080',
-    'http://10.0.2.2:8081', 'http://10.4.2.1:8081',
-    'http://10.164.198.42:8081', 'http://10.164.198.42:3000'
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(null, true); // More permissive for Railway deployment
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   credentials: true,

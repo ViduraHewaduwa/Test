@@ -1,4 +1,4 @@
-const NGO = require('../Models/NgoModel');
+const NGO = require('../models/NgoModel');
 
 // Analyze conversation and match with NGOs
 const MatchNGOFromConversation = async (req, res) => {

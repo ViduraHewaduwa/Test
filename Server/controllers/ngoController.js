@@ -1,4 +1,4 @@
-const NGO = require('../Models/NgoModel');
+const NGO = require('../models/NgoModel');
 const cloudinary = require('../config/cloudinary');
 
 // Create NGO with image upload
