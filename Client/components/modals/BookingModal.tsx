@@ -101,7 +101,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
 
     const bookingData: BookingData = {
       userId: user.id,
-      lawyerId: lawyer?.id,
+      lawyerId: lawyer?._id,
       date,
       time,
       caseType,

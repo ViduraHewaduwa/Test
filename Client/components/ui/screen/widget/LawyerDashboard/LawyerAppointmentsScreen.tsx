@@ -8,9 +8,13 @@ import {
   ActivityIndicator,
   Alert,
   TextInput,
+  Linking,
 } from "react-native";
 import { useAuth } from "../../../../../context/AuthContext";
-import { getLawyerAppointments, updateAppointmentStatus } from "../../../../../service/appointmentSercive";
+import {
+  getLawyerAppointments,
+  updateAppointmentStatus,
+} from "../../../../../service/appointmentSercive";
 import { useNavigation } from "@react-navigation/native";
 
 const STATUS_OPTIONS = ["All", "Pending", "Confirmed", "Cancelled", "Completed"];
@@ -112,7 +116,10 @@ const LawyerAppointmentsScreen = () => {
   return (
     <View style={styles.container}>
       {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
 
@@ -160,11 +167,29 @@ const LawyerAppointmentsScreen = () => {
               <View style={{ flex: 1 }}>
                 <Text style={styles.clientName}>{item.contactName}</Text>
                 <Text style={styles.details}>
-                  {item.meetingType} • {new Date(item.date).toDateString()} at {item.time}
+                  {item.meetingType} • {new Date(item.date).toDateString()} at{" "}
+                  {item.time}
                 </Text>
                 <Text style={styles.details}>{item.contactEmail}</Text>
                 <Text style={styles.details}>{item.contactPhone}</Text>
                 <Text style={styles.details}>{item.description}</Text>
+
+                {/* Call & Message Buttons */}
+                <View style={styles.actionButtonsContainer}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: "#4CAF50" }]}
+                    onPress={() => Linking.openURL(`tel:${item.contactPhone}`)}
+                  >
+                    <Text style={styles.actionButtonText}>Call</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: "#2196F3" }]}
+                    onPress={() => Linking.openURL(`sms:${item.contactPhone}`)}
+                  >
+                    <Text style={styles.actionButtonText}>Message</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <TouchableOpacity
@@ -276,6 +301,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   statusText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  actionButtonsContainer: {
+    flexDirection: "row",
+    marginTop: 8,
+  },
+  actionButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  actionButtonText: {
     color: "#fff",
     fontWeight: "600",
   },

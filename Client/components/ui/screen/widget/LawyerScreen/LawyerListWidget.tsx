@@ -32,7 +32,7 @@ const LawyerListWidget = ({
   const [isModalVisible, setModalVisible] = useState(false);
 
   const handleBook = (lawyer: any) => {
-    console.log("selected lawyerrr id : ",lawyer._id)
+   
     setSelectedLawyer(lawyer);
     setModalVisible(true);
   };
@@ -45,11 +45,10 @@ const LawyerListWidget = ({
   const handleBookingSubmit = async (bookingData: any) => {
     try {
       if (!selectedLawyer) return;
-      console.log("selected lawyer : ",selectedLawyer.id)
 
       const payload = {
-        userId: bookingData.userId, // ensure userId is passed from modal
-        lawyerId: selectedLawyer.id,
+        userId: bookingData.userId,
+        lawyerId: selectedLawyer._id,
         date: bookingData.date,
         time: bookingData.time,
         meetingType: bookingData.meetingType,
