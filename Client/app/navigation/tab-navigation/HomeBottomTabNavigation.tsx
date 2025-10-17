@@ -24,6 +24,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import notificationService, { Notification } from "../../../services/notificationService";
 import { COLOR } from "@/constants/ColorPallet";
+import logo from "../../../assets/images/logo/Law Firm Logo Black and White (1).png"
 
 const Tab = createBottomTabNavigator();
 
@@ -245,39 +246,98 @@ export default function HomeBottomTabNavigation({ navigation }: any) {
 
   /** Bottom Tabs */
   const UserTabs = () => (
-    <Tab.Navigator
-      initialRouteName="Home"
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, focused }) => {
-          let iconName: string = "";
-          switch (route.name) {
-            case "Home": iconName = focused ? "home" : "home-outline"; break;
-            case "Forum": iconName = focused ? "chatbox" : "chatbox-outline"; break;
-            case "Documents": iconName = focused ? "document" : "document-outline"; break;
-            case "Lawyer": iconName = focused ? "briefcase" : "briefcase-outline"; break;
-            case "Menu": iconName = focused ? "menu" : "menu-outline"; break;
-          }
-          return <Ionicons name={iconName as any} size={22} color={color} />;
-        },
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.primary,
-        tabBarStyle: {
-          backgroundColor: colors.white,
-          borderTopColor: theme === "light" ? "#F5F5F7" : colors.darkgray,
-          borderTopWidth: 1,
-          height: 65,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
-      })}
-    >
-      <Tab.Screen name="Home" component={HomePageScreen} options={{ headerTitle: "" }} />
-      <Tab.Screen name="Documents" component={DocumentAnalyseScreen} options={{ headerTitle: "Documents" }} />
-      <Tab.Screen name="Forum" component={ForumScreen} options={{ headerTitle: "Forum" }} />
-      <Tab.Screen name="Lawyer" component={LawyerScreen} options={{ headerTitle: "Find Lawyers" }} />
-      <Tab.Screen name="Menu" component={MenuScreen} options={{ headerTitle: "Menu" }} />
-    </Tab.Navigator>
-  );
+  <Tab.Navigator
+    initialRouteName="Home"
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ color, focused }) => {
+        let iconName = "";
+        switch (route.name) {
+          case "Home": iconName = focused ? "home" : "home-outline"; break;
+          case "Forum": iconName = focused ? "chatbox" : "chatbox-outline"; break;
+          case "Documents": iconName = focused ? "document" : "document-outline"; break;
+          case "Lawyer": iconName = focused ? "briefcase" : "briefcase-outline"; break;
+          case "Menu": iconName = focused ? "menu" : "menu-outline"; break;
+        }
+        return <Ionicons name={iconName as any} size={22} color={color} />;
+      },
+
+      // 🎨 HEADER STYLE
+      headerStyle: {
+        backgroundColor: colors.white,
+        elevation: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        height: 90,
+        borderBottomWidth: 1,
+        borderBottomColor: theme === "light" ? "#F5F5F7" : colors.darkgray,
+      },
+      headerTintColor: colors.primary,
+
+      // 🧭 HEADER LEFT — LOGO
+      headerLeft: () => (
+        <View style={{ marginLeft: 0 }}>
+          <Image
+            source={logo}
+            style={{ width: 120, height: 120, resizeMode: "contain" }}
+          />
+        </View>
+      ),
+
+      // 🔔 HEADER RIGHT — ICONS
+      headerRight: () => (
+        <View style={{ flexDirection: "row", alignItems: "center", marginRight: 16 }}>
+          <TouchableOpacity onPress={handleOpenNotifications} style={{ marginRight: 16 }}>
+            <Ionicons name="notifications-outline" size={24} color={colors.accent} />
+            {unreadCount > 0 && (
+              <View
+                style={{
+                  position: "absolute",
+                  right: -2,
+                  top: -2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: 7,
+                  backgroundColor: "#FF3B30",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}>{unreadCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={navigateToChat} style={{ marginRight: 16 }}>
+            <Ionicons name="chatbubbles-outline" size={24} color={colors.accent} />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={navigateToProfile}>
+            <Ionicons name="person-circle-outline" size={28} color={colors.accent} />
+          </TouchableOpacity>
+        </View>
+      ),
+
+      tabBarActiveTintColor: colors.accent,
+      tabBarInactiveTintColor: colors.primary,
+      tabBarStyle: {
+        backgroundColor: colors.white,
+        borderTopColor: theme === "light" ? "#F5F5F7" : colors.darkgray,
+        borderTopWidth: 1,
+        height: 65,
+        paddingBottom: 8,
+        paddingTop: 8,
+      },
+    })}
+  >
+    <Tab.Screen name="Home" component={HomePageScreen} options={{ headerTitle: "HOME" }} />
+    <Tab.Screen name="Documents" component={DocumentAnalyseScreen} options={{ headerTitle: "DOCUMENTS" }} />
+    <Tab.Screen name="Forum" component={ForumScreen} options={{ headerTitle: "FORUM" }} />
+    <Tab.Screen name="Lawyer" component={LawyerScreen} options={{ headerTitle: "FIND LAWYERS" }} />
+    <Tab.Screen name="Menu" component={MenuScreen} options={{ headerTitle: "MENU" }} />
+  </Tab.Navigator>
+);
 
   const LawyerTabs = () => (
     <Tab.Navigator
