@@ -51,6 +51,7 @@ class NotificationService {
         },
         signal: controller.signal,
       });
+      console.log("notifications : ",response)
 
       clearTimeout(timeoutId);
 
@@ -236,7 +237,34 @@ class NotificationService {
       return 'Just now';
     }
   }
+
+
+  async getLawyerNotifications(lawyerEmail: string): Promise<Notification[]> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const response = await fetch(`${BASE_URL}/notifications/lawyer/${encodeURIComponent(lawyerEmail)}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const result: NotificationsResponse = await response.json();
+    if (result.success) return result.data;
+    throw new Error('Failed to fetch lawyer notifications');
+  } catch (error) {
+    console.error('Error fetching lawyer notifications:', error);
+    return [];
+  }
 }
+}
+
+
 
 export default new NotificationService();
 

@@ -13,21 +13,23 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['comment', 'reply', 'mention', 'like'],
+    enum: ['comment', 'reply', 'mention', 'like','appointment'],
     default: 'comment'
   },
+  appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' },
+  message: { type: String, required: true },
   postId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post',
-    required: true
+    required: false
   },
   postTitle: {
     type: String,
-    required: true
+    required: false
   },
   commentContent: {
     type: String,
-    required: true,
+    required: false,
     maxlength: 200 // Store truncated version for notification
   },
   isRead: {

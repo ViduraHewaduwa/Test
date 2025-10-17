@@ -204,3 +204,30 @@ exports.createNotification = async (notificationData) => {
   }
 };
 
+// Get all notifications for a lawyer
+exports.getLawyerNotifications = async (req, res) => {
+  try {
+    const { lawyerEmail } = req.params;
+
+    if (!lawyerEmail) {
+      return res.status(400).json({ success: false, message: 'Lawyer email is required' });
+    }
+
+    const notifications = await Notification.find({ recipient: lawyerEmail })
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    res.status(200).json({
+      success: true,
+      data: notifications,
+      count: notifications.length
+    });
+  } catch (error) {
+    console.error('Error fetching lawyer notifications:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching lawyer notifications',
+      error: error.message
+    });
+  }
+};

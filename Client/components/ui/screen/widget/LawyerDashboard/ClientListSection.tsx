@@ -43,27 +43,31 @@ const ClientListSection = () => {
         <Text style={{ color: colors.secondary }}>No clients found.</Text>
       ) : (
         <FlatList
-          data={clients}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <View style={[styles.clientCard, { backgroundColor: colors.light }]}>
-              <View>
-                <Text style={[styles.clientName, { color: colors.primary }]}>
-                  {item.firstName} {item.lastName}
-                </Text>
-                <Text style={[styles.contact, { color: colors.tertiary }]}>
-                  📧 {item.email || "No email"}
-                </Text>
-                <Text style={[styles.contact, { color: colors.tertiary }]}>
-                  📞 {item.contactNumber || "No contact"}
-                </Text>
-              </View>
-              <TouchableOpacity style={[styles.messageButton, { backgroundColor: colors.accent }]}>
-                <Text style={[styles.messageText, { color: colors.white }]}>Message</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        />
+  data={clients}
+  keyExtractor={(item, index) => item._id ? item._id : index.toString()}
+  renderItem={({ item, index }) => (
+    <View
+      key={item._id ? item._id : index.toString()} // ✅ add key here
+      style={[styles.clientCard, { backgroundColor: colors.light }]}
+    >
+      <View>
+        <Text style={[styles.clientName, { color: colors.primary }]}>
+          {item.firstName} {item.lastName}
+        </Text>
+        <Text style={[styles.contact, { color: colors.tertiary }]}>
+          📧 {item.email || "No email"}
+        </Text>
+        <Text style={[styles.contact, { color: colors.tertiary }]}>
+          📞 {item.contactNumber || "No contact"}
+        </Text>
+      </View>
+      <TouchableOpacity style={[styles.messageButton, { backgroundColor: colors.accent }]}>
+        <Text style={[styles.messageText, { color: colors.white }]}>Message</Text>
+      </TouchableOpacity>
+    </View>
+  )}
+/>
+
       )}
     </View>
   );

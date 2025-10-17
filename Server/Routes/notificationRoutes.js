@@ -20,5 +20,8 @@ router.delete('/user/:userEmail/clear-all', notificationController.deleteAllNoti
 // Delete a notification
 router.delete('/:notificationId', notificationController.deleteNotification);
 
+// Lawyer notifications
+router.get('/lawyer/:lawyerEmail', notificationController.getLawyerNotifications);
+
 module.exports = router;
 

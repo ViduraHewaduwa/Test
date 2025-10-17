@@ -2,6 +2,7 @@
 const Appointment = require('../models/Appointment');
 const Lawyer = require('../models/User');
 const { updateLawyerPoints } = require("../utils/lawyerPoints");
+const Notification = require('../models/Notification');
 
 // Create an appointment
 exports.createAppointment = async (req, res) => {
@@ -26,6 +27,15 @@ exports.createAppointment = async (req, res) => {
       contactName,
       contactEmail,
       contactPhone
+    });
+
+        // Create a notification for the lawyer
+    const notification = await Notification.create({
+      recipient: lawyer.email, // assuming lawyer has an email field
+      sender: contactName || 'User', // whoever booked the appointment
+      type: 'appointment',
+      appointmentId: appointment._id,
+      message: `New appointment booked on ${date} at ${time}.`
     });
 
     res.status(201).json({ message: 'Appointment created', appointment });
