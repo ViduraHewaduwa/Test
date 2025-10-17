@@ -5,7 +5,6 @@ import { useAuth } from "../../../../../context/AuthContext";
 import { useTheme } from "../../../../../context/ThemeContext";
 import axios from "axios";
 
-// Enable layout animation on Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -37,47 +36,50 @@ const RATING_POINTS = {
 const TierProgressSection = () => {
   const { user } = useAuth();
   const { colors } = useTheme();
+
   const [totalPoints, setTotalPoints] = useState(0);
   const [currentTier, setCurrentTier] = useState("Community Ally");
   const [nextTierPoints, setNextTierPoints] = useState(0);
-  const [progress, setProgress] = useState(new Animated.Value(0));
   const [currentTierData, setCurrentTierData] = useState(TIERS[0]);
   const [expanded, setExpanded] = useState(false);
 
+  const progress = useRef(new Animated.Value(0)).current;
+
+  // Fetch points function
+  const fetchUserPoints = async () => {
+    try {
+      const response = await axios.get(`http://192.168.1.9:3000/api/lawyers/${user.id}/tier`);
+      const lawyer = response.data;
+
+      setTotalPoints(lawyer.totalPoints || 0);
+      setCurrentTier(lawyer.tier || "Community Ally");
+
+      const currentTierIndex = TIERS.findIndex((t) => t.name === lawyer.tier);
+      const tierData = TIERS[currentTierIndex] || TIERS[0];
+      setCurrentTierData(tierData);
+
+      const nextTierThreshold = TIERS[currentTierIndex + 1]?.points || lawyer.totalPoints;
+      setNextTierPoints(nextTierThreshold);
+
+      const tierStartPoints = currentTierIndex > 0 ? TIERS[currentTierIndex - 1].points : 0;
+      const progressValue = Math.min(
+        (lawyer.totalPoints - tierStartPoints) / (nextTierThreshold - tierStartPoints),
+        1
+      );
+
+      Animated.timing(progress, {
+        toValue: progressValue,
+        duration: 800,
+        useNativeDriver: false,
+      }).start();
+    } catch (err) {
+      console.error("Error fetching lawyer points:", err);
+    }
+  };
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3000/api/lawyers/${user.id}/tier`);
-        const lawyer = response.data;
-
-        setTotalPoints(lawyer.totalPoints || 0);
-        setCurrentTier(lawyer.tier || "Community Ally");
-
-        const currentTierIndex = TIERS.findIndex((t) => t.name === lawyer.tier);
-        const tierData = TIERS[currentTierIndex] || TIERS[0];
-        setCurrentTierData(tierData);
-
-        const nextTierThreshold = TIERS[currentTierIndex + 1]?.points || lawyer.totalPoints;
-        setNextTierPoints(nextTierThreshold);
-
-        const tierStartPoints = currentTierIndex > 0 ? TIERS[currentTierIndex - 1].points : 0;
-        const progressValue = Math.min(
-          (lawyer.totalPoints - tierStartPoints) / (nextTierThreshold - tierStartPoints),
-          1
-        );
-
-        Animated.timing(progress, {
-          toValue: progressValue,
-          duration: 800,
-          useNativeDriver: false,
-        }).start();
-      } catch (err) {
-        console.error("Error fetching lawyer points:", err);
-      }
-    };
-
-    fetchUserData();
-    intervalId = setInterval(fetchUserData, 50000);
+    fetchUserPoints(); // fetch once on mount
+    const intervalId = setInterval(fetchUserPoints, 5000); // auto-refresh every 5 seconds
     return () => clearInterval(intervalId);
   }, [user]);
 

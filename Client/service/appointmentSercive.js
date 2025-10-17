@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Change this to your backend URL (localhost or LAN IP)
-const APPOINTMENT_API_URL = "http://localhost:3000/api/appointments"; // Backend endpoint
+const APPOINTMENT_API_URL = "http://192.168.1.9:3000/api/appointments"; // Backend endpoint
 
 // Create a new appointment
 export const createAppointment = async (appointmentData) => {

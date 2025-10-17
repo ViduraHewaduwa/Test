@@ -204,22 +204,8 @@ export default function HomeBottomTabNavigation({ navigation }: any) {
             headerTitle: "",
             headerRight: () => (
               <View style={styles.headerRightContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.iconButton,
-                    {
-                      backgroundColor:
-                        theme === "light" ? COLOR.light.white : colors.darkgray,
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name="search-outline"
-                    size={20}
-                    color={colors.primary}
-                  />
-                </TouchableOpacity>
-                <ThemeSwitcherComponent size="small" />
+                
+                {/* <ThemeSwitcherComponent size="small" /> */}
                 {/* Notifications */}
                 <TouchableOpacity
                   style={[

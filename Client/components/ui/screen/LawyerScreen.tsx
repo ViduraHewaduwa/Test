@@ -1,6 +1,6 @@
 import LawyerNetworkScreen from "@/components/modals/LawyerNetworkScreen";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, StatusBar, Alert } from "react-native";
+import { StyleSheet, View, StatusBar, Alert, SafeAreaView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../../../context/ThemeContext";
 
@@ -60,7 +60,7 @@ export default function LawyerScreen() {
         10,
         categoryParam
       );
-      const data = response.data; // Axios automatically parses JSON
+      const data = response.data;
       console.log("dataaaaa:",data.data);
 
       if (data.message === "list" && data.data) {
@@ -118,11 +118,12 @@ export default function LawyerScreen() {
   // @ts-ignore
   const handleCardPress = (item) => {
     navigation.navigate("LawyerProfile", {
-      lawyerId: item._id, // or item.id depending on your backend
+      lawyerId: item._id,
     });
   };
+  
   return (
-    <View style={[styles.container, { backgroundColor: colors.light }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.light }]}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Header Component */}
@@ -160,14 +161,12 @@ export default function LawyerScreen() {
         visible={loading && page === 1}
         message="Loading Lawyers..."
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

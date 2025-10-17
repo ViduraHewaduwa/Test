@@ -24,7 +24,7 @@ export default function NgoProfileScreen({route, navigation }) {
 
     // API configuration
     const getApiUrl = () => {
-        const DEV_IP = 'localhost'; //192.168.8.189
+        const DEV_IP = '192.168.1.9'; //192.168.8.189
         return `http://${DEV_IP}:3000/api/ngo`;
     };
 

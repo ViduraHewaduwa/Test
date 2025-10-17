@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,470 +6,598 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
-  ScrollView,
+  Animated,
+  Dimensions,
+  FlatList,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../../context/ThemeContext";
-
-const lawyer = require("../../../assets/images/pngtree-female-lawyer-png-image_14809305.png");
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
+const { width } = Dimensions.get("window");
+const lawyer = require("../../../assets/images/pngtree-female-lawyer-png-image_14809305.png");
+
 export default function HomePageScreen() {
-  const { colors, theme } = useTheme(); // Get current theme colors and theme state
+  const { colors } = useTheme();
   const navigation = useNavigation();
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  // Define all sections as items in an array
+  const sections = [
+    { key: "hero" },
+    { key: "stats" },
+    { key: "featured" },
+    { key: "testimonial" },
+    { key: "success" },
+    { key: "ctaFooter" },
+  ];
+
+  const renderSection = ({ item }) => {
+    switch (item.key) {
+      case "hero":
+        return (
+          <LinearGradient
+            colors={[colors.primary, colors.secondary]}
+            style={styles.heroSection}
+          >
+            <Animated.View
+              style={[
+                styles.heroContent,
+                { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
+              ]}
+            >
+              {/* Floating Stats */}
+              <View style={styles.floatingStats}>
+                <View
+                  style={[styles.floatingCard, { backgroundColor: "rgba(255,255,255,0.15)" }]}
+                >
+                  <Text style={styles.floatingNumber}>16+</Text>
+                  <Text style={styles.floatingLabel}>Years</Text>
+                </View>
+                <View
+                  style={[styles.floatingCard, { backgroundColor: "rgba(255,255,255,0.15)" }]}
+                >
+                  <Text style={styles.floatingNumber}>100+</Text>
+                  <Text style={styles.floatingLabel}>Volunteers</Text>
+                </View>
+              </View>
+
+              <Text style={styles.heroTitle}>Justice for{"\n"}Everyone</Text>
+              <Text style={styles.heroSubtitle}>
+                Innovative legal strategies for equality and justice
+              </Text>
+
+              <TouchableOpacity
+                style={[styles.ctaButton, { backgroundColor: colors.accent }]}
+                onPress={() => navigation.navigate("Lawyer")}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.ctaButtonText, { color: '#fff' }]}>Get Legal Help</Text>
+                <Ionicons name="arrow-forward" size={20} color="#fff" />
+              </TouchableOpacity>
+
+              <View style={styles.heroDecoration}>
+                <View style={[styles.circle, { backgroundColor: "rgba(255,255,255,0.1)" }]} />
+                <View style={[styles.circleSmall, { backgroundColor: "rgba(255,255,255,0.08)" }]} />
+              </View>
+            </Animated.View>
+          </LinearGradient>
+        );
+
+      case "stats":
+        return (
+          <View style={styles.statsGrid}>
+            {[{
+              icon: "account-group",
+              color: "#E3F2FD",
+              number: "1,200+",
+              label: "People Supported"
+            },{
+              icon: "trophy",
+              color: "#FFF3E0",
+              number: "35+",
+              label: "Landmark Cases"
+            },{
+              icon: "shield-check",
+              color: "#E8F5E9",
+              number: "1,500+",
+              label: "Protected Rights"
+            }].map((stat, idx) => (
+              <View key={idx} style={[styles.statCard, { backgroundColor: colors.white }]}>
+                <View style={[styles.statIconContainer, { backgroundColor: stat.color }]}>
+                  <MaterialCommunityIcons
+                    name={stat.icon}
+                    size={28}
+                    color={colors.primary}
+                  />
+                </View>
+                <Text style={[styles.statCardNumber, { color: colors.primary }]}>{stat.number}</Text>
+                <Text style={[styles.statCardLabel, { color: colors.darkgray }]}>{stat.label}</Text>
+              </View>
+            ))}
+          </View>
+        );
+
+      case "featured":
+        return (
+          <View style={[styles.featuredSection, { backgroundColor: colors.light }]}>
+            <View style={styles.featuredContent}>
+              <View style={styles.featuredTextContainer}>
+                <View style={styles.badgeContainer}>
+                  <View style={[styles.badge, { backgroundColor: colors.accent }]}>
+                    <Text style={styles.badgeText}>Our Mission</Text>
+                  </View>
+                </View>
+
+                <Text style={[styles.featuredTitle, { color: colors.primary }]}>
+                  Standing with communities who face inequality
+                </Text>
+
+                <Text style={[styles.featuredDescription, { color: colors.darkgray }]}>
+                  We provide legal support and advocacy to protect rights, promote equality, and fight injustice in our communities.
+                </Text>
+
+                <View style={styles.featuredStats}>
+                  <View style={styles.featuredStatItem}>
+                    <MaterialCommunityIcons name="gavel" size={24} color={colors.accent} />
+                    <Text style={[styles.featuredStatText, { color: colors.primary }]}>
+                      Expert Legal Team
+                    </Text>
+                  </View>
+                  <View style={styles.featuredStatItem}>
+                    <MaterialCommunityIcons name="hand-heart" size={24} color={colors.accent} />
+                    <Text style={[styles.featuredStatText, { color: colors.primary }]}>
+                      Community First
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.featuredImageContainer}>
+                <View style={[styles.imageBorder, { borderColor: colors.accent }]} />
+                <Image source={lawyer} style={styles.featuredImage} />
+              </View>
+            </View>
+          </View>
+        );
+
+      case "testimonial":
+        return (
+          <View style={[styles.testimonialCard, { backgroundColor: colors.white }]}>
+            <View style={styles.quoteIconContainer}>
+              <Ionicons name="chatbox-ellipses" size={32} color={colors.accent} />
+            </View>
+
+            <Text style={[styles.testimonialQuote, { color: colors.primary }]}>
+              "We stand with communities who face inequality, giving them a voice and protecting their rights."
+            </Text>
+
+            <View style={styles.testimonialAuthor}>
+              <Image
+                source={{
+                  uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+                }}
+                style={styles.authorImage}
+              />
+              <View style={styles.authorInfo}>
+                <Text style={[styles.authorName, { color: colors.primary }]}>Liam Bennett</Text>
+                <Text style={[styles.authorRole, { color: colors.darkgray }]}>Lead Advocate</Text>
+              </View>
+            </View>
+          </View>
+        );
+
+      case "success":
+        return (
+          <View style={[styles.successSection, { backgroundColor: colors.light }]}>
+            <View style={styles.sectionHeader}>
+              <View>
+                <Text style={[styles.sectionTitle, { color: colors.primary }]}>Recent Victories</Text>
+                <Text style={[styles.sectionSubtitle, { color: colors.darkgray }]}>Empowering communities through justice</Text>
+              </View>
+              <View style={[styles.iconCircle, { backgroundColor: "#FFF3E0" }]}>
+                <MaterialCommunityIcons name="trophy-variant" size={28} color="#FF9800" />
+              </View>
+            </View>
+
+            <View style={[styles.successCard, { backgroundColor: colors.white }]}>
+              <View style={styles.successItem}>
+                <View style={[styles.successBullet, { backgroundColor: colors.accent }]} />
+                <Text style={[styles.successText, { color: colors.darkgray }]}>
+                  Successfully represented <Text style={styles.highlight}>LGBTQ+ individuals</Text> who were denied employment opportunities
+                </Text>
+              </View>
+
+              <View style={styles.successItem}>
+                <View style={[styles.successBullet, { backgroundColor: colors.accent }]} />
+                <Text style={[styles.successText, { color: colors.darkgray }]}>
+                  Supported <Text style={styles.highlight}>families of disabled children</Text> to secure their right to inclusive <Text style={styles.highlight}>education</Text>
+                </Text>
+              </View>
+            </View>
+          </View>
+        );
+
+      case "ctaFooter":
+        return (
+          <View style={[styles.ctaFooter, { backgroundColor: colors.primary }]}>
+            <Text style={styles.ctaFooterTitle}>Ready to take action?</Text>
+            <Text style={styles.ctaFooterSubtitle}>
+              Connect with our legal experts today
+            </Text>
+            <TouchableOpacity
+              style={[styles.footerButton, { backgroundColor: colors.accent }]}
+              onPress={() => navigation.navigate("Lawyer")}
+            >
+              <Text style={[styles.footerButtonText, { color: '#fff' }]}>Find a Lawyer</Text>
+            </TouchableOpacity>
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.light }]}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
+      <FlatList
+        data={sections}
+        keyExtractor={(item) => item.key}
+        renderItem={renderSection}
         showsVerticalScrollIndicator={false}
-      >
-        {/* Testimonial Section */}
-        <View
-          style={[
-            styles.testimonialSection,
-            {
-              backgroundColor: colors.white,
-              shadowColor: colors.shadow,
-            },
-          ]}
-        >
-          <View style={styles.testimonialContent}>
-            <Text
-              style={[
-                styles.quoteIcon,
-                { color: colors.accent, fontStyle: "italic" },
-              ]}
-            >
-              "
-            </Text>
-            <Text
-              style={[
-                styles.testimonialText,
-                { color: colors.primary, fontStyle: "italic" },
-              ]}
-            >
-              We stand with communities{"\n"}who face inequality,{"\n"}giving
-              them a voice{"\n"}and protecting their rights.
-            </Text>
-            <Text
-              style={[
-                styles.profileName,
-                { color: colors.accent, fontStyle: "italic" },
-              ]}
-            >
-              Liam Bennett
-            </Text>
-            <Text
-              style={[
-                styles.quoteIcon,
-                { color: colors.accent, fontStyle: "italic" },
-              ]}
-            >
-              "
-            </Text>
-          </View>
-          <Image
-            source={{
-              uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-            }}
-            style={styles.profileImage}
-          />
-        </View>
-
-        {/* Statistics Section */}
-        <LinearGradient
-          colors={[colors.primary, colors.secondary]}
-          style={styles.statsSection}
-        >
-          {/* Stat 1 */}
-          <View style={styles.statItem}>
-            <View
-              style={[
-                styles.statIconCircle,
-                { backgroundColor: "rgba(255,255,255,0.3)" },
-              ]}
-            >
-              <Text style={styles.statIcon}>📊</Text>
-            </View>
-            <Text style={[styles.statNumber, { color: colors.white }]}>
-              1200+
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.white }]}>
-              people supported
-            </Text>
-          </View>
-          {/* Stat 2 */}
-          <View style={styles.statItem}>
-            <View
-              style={[
-                styles.statIconCircle,
-                { backgroundColor: "rgba(255,255,255,0.3)" },
-              ]}
-            >
-              <Text style={styles.statIcon}>🏆</Text>
-            </View>
-            <Text style={[styles.statNumber, { color: colors.white }]}>
-              35+
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.white }]}>
-              landmark cases
-            </Text>
-          </View>
-        </LinearGradient>
-
-        {/* Innovative Legal Strategies Section */}
-        <View
-          style={[styles.innovativeSection, { backgroundColor: colors.light }]}
-        >
-          <View style={styles.protectedInterests}>
-            <Text style={[styles.protectedText, { color: colors.primary }]}>
-              1500+ protected
-            </Text>
-            <View style={styles.shieldIcon}>
-              <Text style={styles.shieldEmoji}>🛡️</Text>
-            </View>
-            <Text style={[styles.interestsText, { color: colors.primary }]}>
-              interests
-            </Text>
-          </View>
-          <Text style={[styles.innovativeTitle, { color: colors.primary }]}>
-            Innovative{"\n"}legal strategies{"\n"}for equality and justice
-          </Text>
-          <TouchableOpacity
-            style={[styles.consultButton, { backgroundColor: colors.accent }]}
-            onPress={() =>
-              navigation.navigate("Lawyer")
-            }
-          >
-            <Text style={[styles.consultButtonText, { color: colors.white }]}>
-              Get Legal Help
-            </Text>
-            <Text style={[styles.arrowIcon, { color: colors.white }]}>→</Text>
-          </TouchableOpacity>
-          <View style={styles.professionalImageContainer}>
-            <Image source={lawyer} style={styles.professionalImage} />
-            <View style={styles.decorativeLines}>
-              <View
-                style={[
-                  styles.decorativeLine1,
-                  { backgroundColor: colors.darkgray },
-                ]}
-              />
-              <View
-                style={[
-                  styles.decorativeLine2,
-                  { backgroundColor: colors.darkgray },
-                ]}
-              />
-            </View>
-          </View>
-        </View>
-
-        {/* Header Section */}
-        <LinearGradient
-          colors={[colors.primary, colors.secondary]}
-          style={styles.headerSection}
-        >
-          {/* Team Members & Stats */}
-          <View style={styles.statsContainer}>
-            <View style={styles.avatarContainer1}>
-              <Image
-                source={{
-                  uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-                }}
-                style={[styles.avatar, { borderColor: colors.white }]}
-              />
-            </View>
-            <View style={styles.yearsSection}>
-              <Text style={[styles.bigNumber, { color: colors.white }]}>
-                16
-              </Text>
-              <Text style={[styles.statLabel, { color: colors.white }]}>
-                years of advocacy
-              </Text>
-            </View>
-            <View style={styles.avatarContainer2}>
-              <Image
-                source={{
-                  uri: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face",
-                }}
-                style={[styles.avatar, { borderColor: colors.white }]}
-              />
-            </View>
-            <TouchableOpacity
-              style={[styles.calendarButton, { backgroundColor: colors.white }]}
-            >
-              <Text style={styles.calendarIcon}>📅</Text>
-            </TouchableOpacity>
-            <View style={styles.teamSection}>
-              <Text style={[styles.bigNumber, { color: colors.white }]}>
-                100+
-              </Text>
-              <Text style={[styles.statLabel, { color: colors.white }]}>
-                dedicated volunteers
-              </Text>
-            </View>
-          </View>
-          <View style={styles.decorativeLines}>
-            <View
-              style={[
-                styles.line1,
-                { backgroundColor: "rgba(255, 255, 255, 0.3)" },
-              ]}
-            />
-            <View
-              style={[
-                styles.line2,
-                { backgroundColor: "rgba(255, 255, 255, 0.3)" },
-              ]}
-            />
-            <View
-              style={[
-                styles.line3,
-                { backgroundColor: "rgba(255, 255, 255, 0.3)" },
-              ]}
-            />
-          </View>
-        </LinearGradient>
-
-        {/* Victories Section */}
-        <View
-          style={[styles.victoriesSection, { backgroundColor: colors.white }]}
-        >
-          <View style={styles.victoriesHeader}>
-            <Text style={[styles.victoriesTitle, { color: colors.primary }]}>
-              Victories that empower {"\n"}communities
-            </Text>
-            <Text style={styles.trophyIcon}>🏆</Text>
-          </View>
-          <View style={styles.caseDescription}>
-            <Text style={[styles.caseText, { color: colors.darkgray }]}>
-              <Text style={[styles.lightText, { color: colors.darkgray }]}>
-                We successfully represented{" "}
-              </Text>
-              <Text style={[styles.boldText, { color: colors.primary }]}>
-                LGBTQ+
-              </Text>
-              <Text style={[styles.lightText, { color: colors.darkgray }]}>
-                {" "}
-                individuals who were denied employment We supported
-              </Text>
-              <Text style={[styles.boldText, { color: colors.primary }]}>
-                families of disabled children
-              </Text>
-              <Text style={[styles.lightText, { color: colors.darkgray }]}>
-                {" "}
-                to secure their right to inclusive{" "}
-              </Text>
-              <Text style={[styles.boldText, { color: colors.primary }]}>
-                education.
-              </Text>
-            </Text>
-          </View>
-        </View>
-      </ScrollView>
+      />
     </SafeAreaView>
   );
 }
 
-// Styles (static styles only, colors applied dynamically)
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { paddingBottom: 30 },
-  headerSection: {
+  scrollContent: { paddingBottom: 0 },
+  
+  // Hero Section
+  heroSection: {
     paddingTop: 60,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    position: "relative",
-    minHeight: 500,
+    paddingBottom: 80,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    overflow: 'hidden',
   },
-  testimonialSection: {
-    flexDirection: "row",
-    marginHorizontal: 0,
-    marginTop: 10,
+  heroContent: {
+    alignItems: 'center',
+  },
+  floatingStats: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 32,
+  },
+  floatingCard: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+    alignItems: 'center',
+    minWidth: 90,
+  },
+  floatingNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  floatingLabel: {
+    fontSize: 12,
+    color: '#fff',
+    opacity: 0.9,
+    marginTop: 2,
+  },
+  heroTitle: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    lineHeight: 56,
+    marginBottom: 16,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
+    opacity: 0.9,
+    paddingHorizontal: 20,
+    marginBottom: 32,
+    lineHeight: 24,
+  },
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 30,
+    gap: 8,
+  },
+  ctaButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  heroDecoration: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  circle: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    top: -50,
+    right: -50,
+  },
+  circleSmall: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    bottom: -20,
+    left: -30,
+  },
+
+  // Stats Grid
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 24,
+    marginTop: -40,
+    gap: 16,
+    justifyContent: 'space-between',
+  },
+  statCard: {
+    width: (width - 64) / 3,
+    padding: 16,
+    borderRadius: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  statIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  statCardNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  statCardLabel: {
+    fontSize: 11,
+    textAlign: 'center',
+    lineHeight: 14,
+  },
+
+  // Featured Section
+  featuredSection: {
+    paddingHorizontal: 24,
+    paddingVertical: 48,
+  },
+  featuredContent: {
+    alignItems: 'center',
+  },
+  featuredTextContainer: {
+    width: '100%',
+    marginBottom: 32,
+  },
+  badgeContainer: {
+    marginBottom: 16,
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  featuredTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    lineHeight: 36,
+    marginBottom: 16,
+  },
+  featuredDescription: {
+    fontSize: 15,
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  featuredStats: {
+    gap: 16,
+  },
+  featuredStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  featuredStatText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  featuredImageContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageBorder: {
+    position: 'absolute',
+    width: 220,
+    height: 280,
+    borderWidth: 3,
+    borderRadius: 30,
+    top: -10,
+    left: -10,
+  },
+  featuredImage: {
+    width: 200,
+    height: 280,
+    resizeMode: 'contain',
+  },
+
+  // Testimonial
+  testimonialCard: {
+    marginHorizontal: 24,
+    padding: 24,
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+    marginBottom: 32,
+  },
+  quoteIconContainer: {
+    marginBottom: 16,
+  },
+  testimonialQuote: {
+    fontSize: 17,
+    lineHeight: 28,
+    fontStyle: 'italic',
+    marginBottom: 20,
+  },
+  testimonialAuthor: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  authorImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  authorInfo: {
+    flex: 1,
+  },
+  authorName: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  authorRole: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+
+  // Success Section
+  successSection: {
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successCard: {
     padding: 20,
     borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    fontStyle: "italic",
+    gap: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  testimonialContent: { flex: 1, paddingRight: 10, fontStyle: "italic" },
-  quoteIcon: { fontSize: 30, marginBottom: 5 },
-  testimonialText: { fontSize: 20, fontWeight: "light", lineHeight: 28 },
-  profileImage: { width: 80, height: 80, borderRadius: 40 },
-  profileName: { marginTop: 10, fontSize: 16 },
-  statsSection: {
-    marginTop: -30,
-    marginHorizontal: 0,
+  successItem: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  successBullet: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginTop: 6,
+  },
+  successText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  highlight: {
+    fontWeight: 'bold',
+    color: '#2C3E50',
+  },
+
+  // CTA Footer
+  ctaFooter: {
+    marginTop: 32,
+    paddingVertical: 48,
+    paddingHorizontal: 24,
+    alignItems: 'center',
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
-    paddingVertical: 50,
-    alignItems: "center",
   },
-  statItem: { alignItems: "center", marginVertical: 20 },
-  statIconCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
+  ctaFooterTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  statIcon: { fontSize: 20 },
-  statNumber: { fontSize: 60, fontWeight: "bold" },
-  innovativeSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 0,
-    minHeight: 600,
-  },
-  protectedInterests: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 30,
-    justifyContent: "center",
-  },
-  protectedText: { fontSize: 16, fontWeight: "600", paddingVertical: 40 },
-  shieldIcon: { marginHorizontal: 8 },
-  shieldEmoji: { fontSize: 18 },
-  interestsText: { fontSize: 16, fontWeight: "600" },
-  innovativeTitle: {
-    fontSize: 36,
-    fontWeight: "bold",
-    textAlign: "center",
-    lineHeight: 42,
-    marginBottom: 30,
-  },
-  consultButton: {
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 25,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    marginBottom: 40,
-  },
-  consultButtonText: { fontSize: 16, fontWeight: "600", marginRight: 8 },
-  arrowIcon: { fontSize: 16, fontWeight: "bold" },
-  professionalImageContainer: { alignItems: "center", position: "relative" },
-  professionalImage: { width: 200, height: 300, resizeMode: "cover" },
-  decorativeLines: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  decorativeLine1: {
-    position: "absolute",
-    top: 20,
-    left: -30,
-    width: 60,
-    height: 1,
-    transform: [{ rotate: "45deg" }],
-  },
-  decorativeLine2: {
-    position: "absolute",
-    bottom: 40,
-    right: -20,
-    width: 80,
-    height: 1,
-    transform: [{ rotate: "-30deg" }],
-  },
-  victoriesSection: { padding: 30 },
-  victoriesHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 30,
-  },
-  victoriesTitle: { fontSize: 24, fontWeight: "bold", flex: 1, lineHeight: 30 },
-  trophyIcon: { fontSize: 30, marginLeft: 15 },
-  caseDescription: { marginTop: 20 },
-  caseText: { fontSize: 16, lineHeight: 24 },
-  lightText: {},
-  boldText: { fontWeight: "bold" },
-  statsContainer: {
-    flex: 1,
-    position: "relative",
-    justifyContent: "space-around",
-  },
-  avatarContainer1: {
-    position: "absolute",
-    top: 20,
-    right: 60,
-  },
-  avatarContainer2: {
-    position: "absolute",
-    top: 120,
-    right: 30,
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 3,
-  },
-  yearsSection: {
-    marginTop: 40,
-    marginLeft: 20,
-  },
-  teamSection: {
-    marginTop: 80,
-    alignItems: "center",
-  },
-  bigNumber: {
-    fontSize: 80,
-    fontWeight: "bold",
-    lineHeight: 80,
-  },
-  statLabel: {
-    fontSize: 16,
+  ctaFooterSubtitle: {
+    fontSize: 15,
+    color: '#fff',
     opacity: 0.9,
-    marginTop: 5,
+    marginBottom: 24,
+    textAlign: 'center',
   },
-  calendarButton: {
-    position: "absolute",
-    bottom: 80,
-    left: 20,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
+  footerButton: {
+    paddingHorizontal: 40,
+    paddingVertical: 16,
+    borderRadius: 30,
   },
-  calendarIcon: {
-    fontSize: 20,
-  },
-  line1: {
-    position: "absolute",
-    top: 200,
-    right: 0,
-    width: 100,
-    height: 1,
-    transform: [{ rotate: "45deg" }],
-  },
-  line2: {
-    position: "absolute",
-    bottom: 100,
-    left: 0,
-    width: 80,
-    height: 1,
-    transform: [{ rotate: "-30deg" }],
-  },
-  line3: {
-    position: "absolute",
-    top: 150,
-    left: 50,
-    width: 60,
-    height: 1,
-    transform: [{ rotate: "60deg" }],
+  footerButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

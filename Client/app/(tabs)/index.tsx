@@ -1,11 +1,11 @@
-import { StyleSheet, ScrollView, View } from 'react-native';
+import { StyleSheet, ScrollView, View, SafeAreaView } from "react-native";
 import { useState } from "react";
 import SplashScreen from "@/components/ui/screen/SplashScreen";
-import { ThemeProvider } from '@/context/ThemeContext';
+import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
 import AuthNavigator from "@/app/navigation/stack-navigation/AuthStackNavigator";
 // Initialize i18n
-import '@/i18n';
+import "@/i18n";
 
 export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
@@ -13,16 +13,13 @@ export default function HomeScreen() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <ScrollView 
-          style={styles.container} 
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
+        <SafeAreaView style={styles.container}>
           {isLoading ? (
             <SplashScreen onFinish={() => setIsLoading(false)} />
           ) : (
             <AuthNavigator />
           )}
-        </ScrollView>
+        </SafeAreaView>
       </ThemeProvider>
     </AuthProvider>
   );
@@ -31,5 +28,5 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  }
+  },
 });

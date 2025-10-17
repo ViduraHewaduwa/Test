@@ -54,7 +54,7 @@ const LawyerListWidget = ({
         meetingType: bookingData.meetingType,
         description: bookingData.description,
         contactName: bookingData.contactName,
-        contactEmail:bookingData.contactEmail ,
+        contactEmail:bookingData.contactEmail,
         contactPhone: bookingData.contactPhone
       };
 

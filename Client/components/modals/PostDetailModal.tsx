@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   Pressable,
-  ScrollView,
   StyleSheet,
   SafeAreaView,
   StatusBar,
@@ -46,36 +45,41 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ visible, post, onClos
   const getApiUrls = () => {
     if (Platform.OS === 'web') {
       return [
-        'http://localhost:3000/api',
-        'http://127.0.0.1:3000/api',
+        'http://192.168.1.9:3000/api',
+        'http://192.168.1.9:3000/api',
       ];
     } else if (Platform.OS === 'android') {
       return [
-        'http://10.0.2.2:3000/api',     // Android emulator
-        'http://10.4.2.1:3000/api',    // Your computer's IP
-        'http://localhost:3000/api',    // Fallback
+        'http://192.168.1.9:3000/api',     // Android emulator
+        'http://192.168.1.9:3000/api',    // Your computer's IP
+        'http://192.168.1.9:3000/api',    // Fallback
       ];
     } else {
       // iOS simulator
       return [
-        'http://10.4.2.1:3000/api',    // Your computer's IP
-        'http://localhost:3000/api',    // iOS simulator
+        'http://192.168.1.9:3000/api',    // Your computer's IP
+        'http://192.168.1.9:3000/api',    // iOS simulator
       ];
     }
   };
+//      const getApiUrls = () => {
+//   const localIp = "http://192.168.1.9:3000/api/"; // 👈 replace with your actual IP
+//   return [localIp];
+// };
 
   const API_URLS = getApiUrls();
 
-  const [currentApiIndex, setCurrentApiIndex] = useState(0);
-  const BASE_URL = API_URLS[currentApiIndex];
+  // const [currentApiIndex, setCurrentApiIndex] = useState(0);
+  // const BASE_URL = API_URLS[currentApiIndex];
+  const BASE_URL = API_URLS;
 
   // Try next API URL if current one fails
-  const tryNextApiUrl = () => {
-    const nextIndex = (currentApiIndex + 1) % API_URLS.length;
-    console.log(`[PostDetailModal] Trying next API URL: ${API_URLS[nextIndex]}`);
-    setCurrentApiIndex(nextIndex);
-    return nextIndex !== currentApiIndex; // Return false if we've tried all URLs
-  };
+  // const tryNextApiUrl = () => {
+  //   const nextIndex = (currentApiIndex + 1) % API_URLS.length;
+  //   console.log(`[PostDetailModal] Trying next API URL: ${API_URLS[nextIndex]}`);
+  //   setCurrentApiIndex(nextIndex);
+  //   return nextIndex !== currentApiIndex; // Return false if we've tried all URLs
+  // };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -433,7 +437,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ visible, post, onClos
           <View style={styles.headerSpacer} />
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        
           {/* Post Title */}
           <View style={styles.titleSection}>
             <Text style={styles.postTitle}>{post.title}</Text>
@@ -709,7 +713,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ visible, post, onClos
 
           {/* Bottom Spacing */}
           <View style={styles.bottomSpacing} />
-        </ScrollView>
+     
       </SafeAreaView>
     </Modal>
 

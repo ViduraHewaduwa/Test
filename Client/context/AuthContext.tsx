@@ -112,25 +112,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
 
   // Platform-specific API URL configuration with fallback options
+  // const getApiUrls = () => {
+  //   if (Platform.OS === 'web') {
+  //     return [
+  //       'http://localhost:3000/api/auth',
+  //       'http://127.0.0.1:3000/api/auth',
+  //     ];
+  //   } else if (Platform.OS === 'android') {
+  //     return [
+  //       'http://127.0.0.1:3000/api/auth',     // Android emulator
+  //       'http://localhost:3000/api/auth',    // Fallback
+  //     ];
+  //   } else {
+  //     // iOS simulator
+  //     return [
+  //       'http://localhost:3000/api/auth',
+  //       'http://127.0.0.1:3000/api/auth',
+  //     ];
+  //   }
+  // };
   const getApiUrls = () => {
-    if (Platform.OS === 'web') {
-      return [
-        'http://localhost:3000/api/auth',
-        'http://127.0.0.1:3000/api/auth',
-      ];
-    } else if (Platform.OS === 'android') {
-      return [
-        'http://10.0.2.2:3000/api/auth',     // Android emulator
-        'http://localhost:3000/api/auth',    // Fallback
-      ];
-    } else {
-      // iOS simulator
-      return [
-        'http://localhost:3000/api/auth',
-        'http://127.0.0.1:3000/api/auth',
-      ];
-    }
-  };
+  const localIp = "http://192.168.1.9:3000/api/auth"; // 👈 replace with your actual IP
+  return [localIp];
+};
 
   // For Android emulator, use 10.0.2.2 instead of localhost
   // For iOS simulator, localhost should work
