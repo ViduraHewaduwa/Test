@@ -12,7 +12,7 @@ import {
 // Configure base URL - using fixed network IP for mobile environment
 const getApiBaseUrl = () => {
   // Always use the mobile network IP
-  return 'http://172.28.26.224:3000/api';
+  return 'http://10.118.22.42:3000/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -376,40 +376,25 @@ export class DocumentService {
 
       const formData = new FormData();
       
-      // Handle file differently for web vs mobile
-      let fileToUpload: any;
-      
-      if (typeof window !== 'undefined' && file.uri) {
-        // Web platform - convert URI to Blob
-        console.log('🌐 Web platform detected, converting URI to Blob');
-        try {
-          const response = await fetch(file.uri);
-          const blob = await response.blob();
-          
-          fileToUpload = new File([blob], file.name, {
-            type: 'application/pdf'
-          });
-          
-          console.log('📎 Web file prepared:', {
-            name: fileToUpload.name,
-            type: fileToUpload.type,
-            size: fileToUpload.size
-          });
-        } catch (blobError) {
-          console.error('Failed to convert URI to blob:', blobError);
-          throw new Error('Failed to prepare file for upload');
-        }
-      } else {
-        // Mobile platform - use original format
-        console.log('📱 Mobile platform detected, using original file format');
-        fileToUpload = {
+      // Handle file for React Native/Expo environment
+      // Use the file object directly as-is from DocumentPicker
+      if (file.uri) {
+        // React Native/Expo environment
+        console.log('📱 Using file with URI:', file.uri);
+        formData.append('document', {
           uri: file.uri,
-          type: 'application/pdf',
+          type: file.type || 'application/pdf',
           name: file.name,
-        };
+        } as any);
+      } else if (file instanceof File || file instanceof Blob) {
+        // Web File/Blob object
+        console.log('🌐 Using File/Blob object');
+        const fileName = file instanceof File ? file.name : 'document.pdf';
+        formData.append('document', file, fileName);
+      } else {
+        throw new Error('Unsupported file format');
       }
       
-      formData.append('document', fileToUpload);
       formData.append('language', language);
 
       const uploadUrl = API_BASE_URL + '/documents/explain';
