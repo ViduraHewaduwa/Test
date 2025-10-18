@@ -9,22 +9,10 @@ import {
   SupportedLanguage
 } from '@/types/document';
 
-// Configure base URL - automatically detect the best server URL
+// Configure base URL - using fixed network IP for mobile environment
 const getApiBaseUrl = () => {
-  // For Expo development, detect environment and use appropriate URL
-  if (__DEV__) {
-    // Use localhost for web development, network IP for mobile
-    if (typeof window !== 'undefined' && window.location) {
-      // Web environment - use localhost
-      return 'http://172.28.28.0:3000/api';
-    } else {
-      // Mobile environment - use network IP
-      return 'http://172.28.28.0:3000/api';
-    }
-  }
-  
-  // For production, use your production API URL
-  return 'https://your-production-api.com/api';
+  // Always use the mobile network IP
+  return 'http://172.28.26.224:3000/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -51,22 +39,7 @@ api.interceptors.request.use(
 );
 
 // Add response interceptor for better error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.code === 'ERR_NETWORK') {
-      console.error('Network Error: Unable to connect to server at', API_BASE_URL);
-      error.message = `Unable to connect to server at ${API_BASE_URL}. Please check if the backend server is running on port 3000.`;
-    } else if (error.code === 'ECONNREFUSED') {
-      console.error('Connection Refused: Server is not running at', API_BASE_URL);
-      error.message = `Server is not available at ${API_BASE_URL}. Please start the backend server on port 3000.`;
-    } else if (error.response?.status === 404) {
-      console.error('API endpoint not found:', error.config?.url);
-      error.message = 'API endpoint not found. Please check if the document routes are properly configured on the server.';
-    }
-    return Promise.reject(error);
-  }
-);
+
 
 // Document service class
 export class DocumentService {
