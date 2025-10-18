@@ -132,7 +132,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   //   }
   // };
   const getApiUrls = () => {
-  const localIp = "http://192.168.1.9:3000/api/auth"; // 👈 replace with your actual IP
+  const localIp = "http://172.28.28.0:3000/api/auth"; // 👈 replace with your actual IP
   return [localIp];
 };
 
