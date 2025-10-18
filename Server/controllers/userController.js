@@ -521,7 +521,7 @@ const getAllLawyers = async (req, res) => {
   }
 };
 
-module.exports = { getAllLawyers };
+
 
 
 module.exports = {

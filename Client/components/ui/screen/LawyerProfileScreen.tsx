@@ -170,10 +170,13 @@ export default function LawyerAdditionalDetails() {
       formData.append("contactInfo", JSON.stringify(profile.contactInfo));
       formData.append("availability", JSON.stringify(profile.availability));
 
+      // ✅ Correct Expo Go-compatible image upload
       if (profilePicture && !profilePicture.isExisting) {
-        const response = await fetch(profilePicture.uri);
-        const blob = await response.blob();
-        formData.append("profilePicture", blob, `profile_${lawyerId}.jpg`);
+        formData.append("profilePicture", {
+          uri: profilePicture.uri,
+          name: `profile_${lawyerId}.jpg`,
+          type: "image/jpeg",
+        });
       }
 
       const result = await saveLawyerProfile(formData);
@@ -189,7 +192,7 @@ export default function LawyerAdditionalDetails() {
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={COLOR.light.primary} />

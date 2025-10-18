@@ -492,9 +492,7 @@ export default function HomeBottomTabNavigation({ navigation }: any) {
             case "Dashboard":
               iconName = focused ? "home" : "grid-outline";
               break;
-            case "Cases":
-              iconName = focused ? "briefcase" : "briefcase-outline";
-              break;
+            
             case "Documents":
               iconName = focused ? "document-text" : "document-text-outline";
               break;
@@ -554,11 +552,6 @@ export default function HomeBottomTabNavigation({ navigation }: any) {
             </TouchableOpacity>
           ),
         }}
-      />
-      <Tab.Screen
-        name="Cases"
-        component={LawyerCaseScreen}
-        options={commonHeaderOptions}
       />
       <Tab.Screen
         name="Documents"

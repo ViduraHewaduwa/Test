@@ -293,3 +293,54 @@ export const getLawyerTier = async (req, res) => {
     });
   }
 };
+
+// @desc    Get lawyer analytics / stats for graphs
+// @route   GET /api/lawyers/:lawyerId/analytics-graph
+export const getLawyerAnalyticsGraph = async (req, res) => {
+  try {
+    const { lawyerId } = req.params;
+
+    const lawyer = await User.findById(lawyerId)
+      .select("firstName lastName tier totalPoints reviews contributions role");
+
+    if (!lawyer || lawyer.role !== "lawyer") {
+      return res.status(404).json({ success: false, message: "Lawyer not found" });
+    }
+
+    // 1️⃣ Ratings over time (line chart)
+    const ratingsOverTime = lawyer.reviews
+      .sort((a, b) => new Date(a._id.getTimestamp()) - new Date(b._id.getTimestamp()))
+      .map((r) => ({
+        date: r._id.getTimestamp().toISOString().split("T")[0],
+        rating: r.rating,
+      }));
+
+    // 2️⃣ Contributions by type (bar/pie chart)
+    const contributionsByType = lawyer.contributions.reduce((acc, c) => {
+      acc[c.type] = (acc[c.type] || 0) + 1;
+      return acc;
+    }, {});
+
+    // 3️⃣ Language for pie chart: tier distribution
+    const tierInfo = {
+      tier: lawyer.tier,
+      totalPoints: lawyer.totalPoints,
+    };
+
+    res.status(200).json({
+      success: true,
+      lawyerId: lawyer._id,
+      lawyerName: `${lawyer.firstName} ${lawyer.lastName}`,
+      ratingsOverTime,
+      contributionsByType,
+      tierInfo,
+    });
+  } catch (error) {
+    console.error("Error fetching lawyer analytics for graphs:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching analytics",
+      error: error.message,
+    });
+  }
+};
