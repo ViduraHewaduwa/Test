@@ -5,6 +5,7 @@ const cors = require("cors");
 const { MulterError } = require("multer");
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -379,7 +380,7 @@ app.use((req, res) => {
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n${'='.repeat(60)}`);
+    console.log(`\n${'='.repeat(60)}`);
   console.log(`🚀 Server running at http://localhost:${PORT}`);
   console.log(`🌐 Server accessible at http://10.4.2.1:${PORT}`);
   console.log(`${'='.repeat(60)}`);
@@ -396,4 +397,30 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🗄️  MongoDB: ${mongoose.connection.readyState === 1 ? '✅ Connected' : '⏳ Connecting...'}`);
   console.log(`📁 Upload Directories: ✅ Ready`);
   console.log(`${'='.repeat(60)}\n`);
+
+  console.log('\n🚀 Server Started Successfully!');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`📍 Port: ${PORT}`);
+  console.log(`🏠 Local: http://localhost:${PORT}`);
+  
+  // Get all network interfaces
+  const interfaces = os.networkInterfaces();
+  const addresses = [];
+  
+  Object.keys(interfaces).forEach((name) => {
+    interfaces[name].forEach((iface) => {
+      // Skip internal and non-IPv4 addresses
+      if (iface.family === 'IPv4' && !iface.internal) {
+        addresses.push(iface.address);
+      }
+    });
+  });
+  
+  if (addresses.length > 0) {
+    console.log(`📱 Network: http://${addresses[0]}:${PORT}`);
+    console.log('\n💡 To use in your mobile app:');
+    console.log(`   Update config/api.config.ts with IP: ${addresses[0]}`);
+  }
+  
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 });
