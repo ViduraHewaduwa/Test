@@ -26,7 +26,7 @@ import notificationService, {
   Notification,
 } from "../../../services/notificationService";
 import { COLOR } from "@/constants/ColorPallet";
-import logo from "../../../assets/images/logo/Law Firm Logo Black and White (1).png";
+import logo from "../../../assets/images/logo/logo2.jpeg";
 
 const Tab = createBottomTabNavigator();
 
@@ -364,7 +364,7 @@ export default function HomeBottomTabNavigation({ navigation }: any) {
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.05,
           shadowRadius: 8,
-          height: 90,
+          height: 130,
           borderBottomWidth: 1,
           borderBottomColor: theme === "light" ? "#F5F5F7" : colors.darkgray,
         },
@@ -375,7 +375,7 @@ export default function HomeBottomTabNavigation({ navigation }: any) {
           <View style={{ marginLeft: 0 }}>
             <Image
               source={logo}
-              style={{ width: 120, height: 120, resizeMode: "contain" }}
+              style={{ width: 90, height: 90, resizeMode: "contain" }}
             />
           </View>
         ),

@@ -344,3 +344,26 @@ export const getLawyerAnalyticsGraph = async (req, res) => {
     });
   }
 };
+
+export const deleteLawyerById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if lawyer exists
+    const lawyer = await User.findById(id);
+    if (!lawyer) {
+      return res.status(404).json({ success: false, message: "Lawyer not found" });
+    }
+
+    await Lawyer.findByIdAndDelete(id);
+
+    return res.status(200).json({ success: true, message: "Lawyer deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting lawyer:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting lawyer",
+      error: error.message,
+    });
+  }
+};

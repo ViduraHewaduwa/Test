@@ -12,6 +12,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { COLOR } from "../../../constants/ColorPallet";
+import { API_URL_ENV } from '@env';
 
 interface Lawyer {
   id: string;
@@ -95,7 +96,7 @@ const AdminManageLawyers = ({ navigation }: any) => {
         onPress: async () => {
           try {
             const token = await AsyncStorage.getItem("adminToken");
-            const baseUrl = (await AsyncStorage.getItem("adminApiUrl")) || "http://localhost:3000/api/admin";
+            const baseUrl = (await AsyncStorage.getItem("adminApiUrl")) || `${API_URL_ENV}/api`;
 
             const response = await fetch(`${baseUrl}/lawyers/${id}`, {
               method: "DELETE",
@@ -144,7 +145,7 @@ const AdminManageLawyers = ({ navigation }: any) => {
           <Text style={styles.noData}>No lawyers found</Text>
         ) : (
           lawyers.map((lawyer) => (
-            <View key={lawyer._id} style={styles.card}>
+            <View key={lawyer.id} style={styles.card}>
               <View style={styles.cardHeader}>
                 <Text style={styles.name}>
                   {lawyer.firstName} {lawyer.lastName}
