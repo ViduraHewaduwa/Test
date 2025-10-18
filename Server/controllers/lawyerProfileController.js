@@ -6,7 +6,7 @@ const path = require("path");
 
 exports.createOrUpdateProfile = async (req, res) => {
   try {
-    const { lawyerId, experience, aboutMe, contactInfo } = req.body;
+    const { lawyerId, experience, aboutMe, contactInfo,availability } = req.body;
 
     // Validate lawyerId
     if (!lawyerId) return res.status(400).json({ success: false, message: "LawyerId is required" });
@@ -31,12 +31,23 @@ exports.createOrUpdateProfile = async (req, res) => {
       catch { return res.status(400).json({ success: false, message: "Invalid contactInfo format" }); }
     }
 
+     // Parse availability if it's string
+    let parsedAvailability = availability;
+    if (typeof availability === "string") {
+      try {
+        parsedAvailability = JSON.parse(availability);
+      } catch {
+        return res.status(400).json({ success: false, message: "Invalid availability format" });
+      }
+    }
+
     const experienceNum = Number(experience) || 0;
 
     if (profile) {
       profile.experience = experienceNum;
       profile.aboutMe = aboutMe ?? profile.aboutMe;
       profile.contactInfo = parsedContactInfo ?? profile.contactInfo;
+      profile.availability = parsedAvailability ?? profile.availability;
       if (profilePicturePath) profile.profilePicture = profilePicturePath;
     } else {
       profile = new LawyerProfile({
@@ -44,6 +55,11 @@ exports.createOrUpdateProfile = async (req, res) => {
         experience: experienceNum,
         aboutMe: aboutMe || "",
         contactInfo: parsedContactInfo || {},
+         availability: parsedAvailability || {
+          days: [],
+          timeSlots: [],
+          isAvailable: true,
+        },
         profilePicture: profilePicturePath || "",
       });
     }
@@ -124,6 +140,7 @@ exports.getProfile = async (req, res) => {
       aboutMe: profile.aboutMe,
       contactInfo: profile.contactInfo,
       profilePicture: profilePictureUrl,
+      availability: profile.availability, 
       lawyerDetails: {
         id: profile.lawyer._id,
         firstName: profile.lawyer.firstName,

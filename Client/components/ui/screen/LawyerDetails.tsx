@@ -25,7 +25,6 @@ export default function LawyerProfile({ route }) {
 
   // Get lawyer ID from route params
   const lawyerId = route?.params?.lawyerId;
-  console.log("lawyer id 1: ", lawyerId);
 
   useEffect(() => {
     fetchLawyerProfile();
@@ -39,7 +38,7 @@ export default function LawyerProfile({ route }) {
     }
     try {
       const data = await getLawyerProfile(lawyerId);
-      console.log("data : ",data)
+      
 
       setLawyerData({
         ...data,

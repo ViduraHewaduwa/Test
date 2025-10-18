@@ -42,11 +42,30 @@ const lawyerProfileSchema = new mongoose.Schema(
     },
     profilePicture: {
       type: String, // store image file path or URL
-      default: "",  // empty by default
+      default: "", // empty by default
     },
     createdAt: {
       type: Date,
       default: Date.now,
+    },
+    availability: {
+      days: {
+        type: [String], // e.g., ["Monday", "Tuesday", "Friday"]
+        default: [],
+      },
+      timeSlots: {
+        type: [
+          {
+            start: { type: String, required: true }, // "09:00"
+            end: { type: String, required: true }, // "17:00"
+          },
+        ],
+        default: [],
+      },
+      isAvailable: {
+        type: Boolean,
+        default: true, // false if on vacation or unavailable
+      },
     },
   },
   { timestamps: true }

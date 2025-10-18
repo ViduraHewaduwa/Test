@@ -9,7 +9,6 @@ import {
   Alert,
   ActivityIndicator,
   Image,
-  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { COLOR } from "@/constants/ColorPallet";
@@ -29,12 +28,16 @@ export default function LawyerAdditionalDetails() {
       officeLocation: "",
       languages: [],
     },
+    availability: {
+      isAvailable: true,
+      days: [],
+      timeSlots: [],
+    },
   });
 
   const [profilePicture, setProfilePicture] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch existing profile
   useEffect(() => {
     const fetchProfile = async () => {
       if (!lawyerId) return;
@@ -50,6 +53,11 @@ export default function LawyerAdditionalDetails() {
               phone: data.contactInfo?.phone || "",
               officeLocation: data.contactInfo?.officeLocation || "",
               languages: data.contactInfo?.languages || [],
+            },
+            availability: data.availability || {
+              isAvailable: true,
+              days: [],
+              timeSlots: [],
             },
           });
 
@@ -70,7 +78,6 @@ export default function LawyerAdditionalDetails() {
     fetchProfile();
   }, [lawyerId]);
 
-  // Pick image from gallery
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -87,67 +94,7 @@ export default function LawyerAdditionalDetails() {
 
     if (!result.canceled) {
       const asset = result.assets[0];
-      console.log("📸 Image selected:", asset);
-
-      setProfilePicture({
-        uri: asset.uri,
-        isExisting: false,
-      });
-    }
-  };
-
-  const handleSave = async () => {
-    if (!profile.contactInfo.email || !profile.contactInfo.phone) {
-      Alert.alert("Error", "Email and phone are required.");
-      return;
-    }
-
-    if (!lawyerId) {
-      Alert.alert("Error", "User not found.");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      const formData = new FormData();
-
-      // Append text fields
-      formData.append("lawyerId", String(lawyerId));
-      formData.append("experience", String(profile.experience));
-      formData.append("aboutMe", profile.aboutMe);
-      formData.append("contactInfo", JSON.stringify(profile.contactInfo));
-
-      // 🔥 FIXED: Append image only if new (using fetch + blob like your friend's code)
-      if (profilePicture && !profilePicture.isExisting) {
-        try {
-          // Fetch the image as a blob (this is the key difference!)
-          const response = await fetch(profilePicture.uri);
-          const blob = await response.blob();
-          
-          // Append the blob directly with a filename
-          formData.append("profilePicture", blob, `profile_${lawyerId}.jpg`);
-          
-          console.log("📤 Uploading new profile picture");
-        } catch (fetchError) {
-          console.error("❌ Error fetching image:", fetchError);
-          throw new Error("Failed to process image");
-        }
-        
-      } else if (profilePicture?.isExisting) {
-        console.log("ℹ️ Existing profile picture preserved, no upload needed.");
-      } else {
-        console.log("ℹ️ No profile picture provided.");
-      }
-
-      const result = await saveLawyerProfile(formData);
-      console.log("✅ Server response:", result);
-      Alert.alert("Success", "Profile saved successfully!");
-    } catch (error) {
-      console.error("❌ Save error:", error);
-      Alert.alert("Error", error.message || "Failed to save profile.");
-    } finally {
-      setIsLoading(false);
+      setProfilePicture({ uri: asset.uri, isExisting: false });
     }
   };
 
@@ -169,14 +116,77 @@ export default function LawyerAdditionalDetails() {
       const newLangs = exists
         ? prev.contactInfo.languages.filter((l) => l !== lang)
         : [...prev.contactInfo.languages, lang];
-      return {
-        ...prev,
-        contactInfo: { ...prev.contactInfo, languages: newLangs },
-      };
+      return { ...prev, contactInfo: { ...prev.contactInfo, languages: newLangs } };
     });
   };
 
+  const toggleAvailabilityDay = (day) => {
+    setProfile((prev) => {
+      const exists = prev.availability.days.includes(day);
+      const newDays = exists
+        ? prev.availability.days.filter((d) => d !== day)
+        : [...prev.availability.days, day];
+      return { ...prev, availability: { ...prev.availability, days: newDays } };
+    });
+  };
+
+  const addTimeSlot = () => {
+    setProfile((prev) => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        timeSlots: [...prev.availability.timeSlots, { start: "", end: "" }],
+      },
+    }));
+  };
+
+  const updateTimeSlot = (index, key, value) => {
+    const updated = [...profile.availability.timeSlots];
+    updated[index][key] = value;
+    setProfile((prev) => ({
+      ...prev,
+      availability: { ...prev.availability, timeSlots: updated },
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!profile.contactInfo.email || !profile.contactInfo.phone) {
+      Alert.alert("Error", "Email and phone are required.");
+      return;
+    }
+
+    if (!lawyerId) {
+      Alert.alert("Error", "User not found.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const formData = new FormData();
+      formData.append("lawyerId", String(lawyerId));
+      formData.append("experience", String(profile.experience));
+      formData.append("aboutMe", profile.aboutMe);
+      formData.append("contactInfo", JSON.stringify(profile.contactInfo));
+      formData.append("availability", JSON.stringify(profile.availability));
+
+      if (profilePicture && !profilePicture.isExisting) {
+        const response = await fetch(profilePicture.uri);
+        const blob = await response.blob();
+        formData.append("profilePicture", blob, `profile_${lawyerId}.jpg`);
+      }
+
+      const result = await saveLawyerProfile(formData);
+      Alert.alert("Success", "Profile saved successfully!");
+    } catch (error) {
+      Alert.alert("Error", error.message || "Failed to save profile.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const languageOptions = ["English", "Sinhala", "Tamil"];
+  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
     <ScrollView style={styles.container}>
@@ -211,7 +221,6 @@ export default function LawyerAdditionalDetails() {
           value={profile.aboutMe}
           onChangeText={(text) => handleChange("aboutMe", text)}
           multiline
-          numberOfLines={4}
         />
       </View>
 
@@ -220,73 +229,132 @@ export default function LawyerAdditionalDetails() {
         <Text style={styles.label}>Experience (Years)</Text>
         <TextInput
           style={styles.input}
-          placeholder="0"
           keyboardType="numeric"
-          value={profile.experience?.toString()}
+          value={String(profile.experience)}
           onChangeText={(text) => handleChange("experience", Number(text) || 0)}
         />
       </View>
 
-      {/* Contact Info */}
+      {/* Availability */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Availability</Text>
+
+        <TouchableOpacity
+          style={[
+            styles.availabilityToggle,
+            profile.availability.isAvailable && styles.availabilityActive,
+          ]}
+          onPress={() =>
+            setProfile((prev) => ({
+              ...prev,
+              availability: {
+                ...prev.availability,
+                isAvailable: !prev.availability.isAvailable,
+              },
+            }))
+          }
+        >
+          <Text style={styles.availabilityText}>
+            {profile.availability.isAvailable ? "Available" : "Not Available"}
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.label}>Available Days</Text>
+        <View style={styles.languagesContainer}>
+          {daysOfWeek.map((day) => (
+            <TouchableOpacity
+              key={day}
+              style={[
+                styles.languageButton,
+                profile.availability.days.includes(day) && styles.languageSelected,
+              ]}
+              onPress={() => toggleAvailabilityDay(day)}
+            >
+              <Text
+                style={[
+                  styles.languageText,
+                  profile.availability.days.includes(day) && styles.languageTextSelected,
+                ]}
+              >
+                {day}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.label}>Time Slots</Text>
+        {profile.availability.timeSlots.map((slot, index) => (
+          <View key={index} style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              placeholder="Start Time (e.g., 09:00 AM)"
+              value={slot.start}
+              onChangeText={(text) => updateTimeSlot(index, "start", text)}
+            />
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              placeholder="End Time (e.g., 05:00 PM)"
+              value={slot.end}
+              onChangeText={(text) => updateTimeSlot(index, "end", text)}
+            />
+          </View>
+        ))}
+        <TouchableOpacity onPress={addTimeSlot}>
+          <Text style={{ color: COLOR.light.primary, fontWeight: "bold" }}>
+            + Add Time Slot
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Contact Info Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Contact Information</Text>
-
         <View style={styles.field}>
           <Text style={styles.label}>Email *</Text>
           <TextInput
             style={styles.input}
-            placeholder="Email"
-            keyboardType="email-address"
-            autoCapitalize="none"
             value={profile.contactInfo.email}
             onChangeText={(text) => handleChange("contactInfo.email", text)}
           />
         </View>
-
         <View style={styles.field}>
           <Text style={styles.label}>Phone *</Text>
           <TextInput
             style={styles.input}
-            placeholder="Phone"
-            keyboardType="phone-pad"
             value={profile.contactInfo.phone}
             onChangeText={(text) => handleChange("contactInfo.phone", text)}
           />
         </View>
-
         <View style={styles.field}>
           <Text style={styles.label}>Office Location</Text>
           <TextInput
             style={styles.input}
-            placeholder="Location"
             value={profile.contactInfo.officeLocation}
             onChangeText={(text) => handleChange("contactInfo.officeLocation", text)}
           />
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Languages</Text>
-          <View style={styles.languagesContainer}>
-            {languageOptions.map((lang) => (
-              <TouchableOpacity
-                key={lang}
+        <Text style={styles.label}>Languages</Text>
+        <View style={styles.languagesContainer}>
+          {languageOptions.map((lang) => (
+            <TouchableOpacity
+              key={lang}
+              style={[
+                styles.languageButton,
+                profile.contactInfo.languages.includes(lang) && styles.languageSelected,
+              ]}
+              onPress={() => toggleLanguage(lang)}
+            >
+              <Text
                 style={[
-                  styles.languageButton,
-                  profile.contactInfo.languages.includes(lang) && styles.languageSelected,
+                  styles.languageText,
+                  profile.contactInfo.languages.includes(lang) && styles.languageTextSelected,
                 ]}
-                onPress={() => toggleLanguage(lang)}
               >
-                <Text
-                  style={[
-                    styles.languageText,
-                    profile.contactInfo.languages.includes(lang) && styles.languageTextSelected,
-                  ]}
-                >
-                  {lang}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+                {lang}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -327,7 +395,10 @@ const styles = StyleSheet.create({
   languageSelected: { backgroundColor: COLOR.light.primary, borderColor: COLOR.light.primary },
   languageText: { color: "#666" },
   languageTextSelected: { color: "#fff", fontWeight: "600" },
-  saveButton: { marginTop: 20, marginBottom: 40, backgroundColor: COLOR.light.primary, paddingVertical: 14, borderRadius: 8, alignItems: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  availabilityToggle: { padding: 10, borderRadius: 10, borderWidth: 1, borderColor: "#DDD", alignItems: "center", marginBottom: 12 },
+  availabilityActive: { backgroundColor: COLOR.light.primary },
+  availabilityText: { color: "#000", fontWeight: "600" },
+  saveButton: { marginTop: 20, marginBottom: 40, backgroundColor: COLOR.light.primary, paddingVertical: 14, borderRadius: 8, alignItems: "center" },
   saveButtonDisabled: { opacity: 0.6 },
   saveButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
 });

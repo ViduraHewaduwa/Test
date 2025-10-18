@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import { rateLawyer, getLawyerReviews } from "../../../../../service/lawyerServi
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ⭐ Helper function to render stars
-const renderStars = (rating, onPress) => {
+const renderStars = (rating: number, onPress?: (rating: number) => void) => {
   const stars = [];
   for (let i = 1; i <= 5; i++) {
     stars.push(
@@ -28,13 +28,24 @@ const renderStars = (rating, onPress) => {
   return <View style={styles.starRow}>{stars}</View>;
 };
 
-export default function LawyerRatingReviewWidget({ lawyerId }) {
+interface Review {
+  rating: number;
+  comment: string;
+}
+
+interface Props {
+  lawyerId: string;
+}
+
+export default function LawyerRatingReviewWidget({ lawyerId }: Props) {
   const [lawyerName, setLawyerName] = useState("");
   const [averageRating, setAverageRating] = useState(0);
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [userRating, setUserRating] = useState(0);
   const [userComment, setUserComment] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const flatListRef = useRef<FlatList>(null);
 
   // 🧩 Fetch lawyer reviews from backend
   useEffect(() => {
@@ -80,10 +91,15 @@ export default function LawyerRatingReviewWidget({ lawyerId }) {
         setReviews(updatedData.reviews || []);
         setUserRating(0);
         setUserComment("");
+
+        // Scroll to bottom to see new review
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
       } else {
         Alert.alert("Error", "Failed to submit review");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Review submission failed:", err);
       Alert.alert("Failed", err.response?.data?.message || err.message);
     }
@@ -100,9 +116,7 @@ export default function LawyerRatingReviewWidget({ lawyerId }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Rating & Reviews</Text>
-      {lawyerName ? (
-        <Text style={styles.lawyerName}>Lawyer: {lawyerName}</Text>
-      ) : null}
+      {lawyerName ? <Text style={styles.lawyerName}>Lawyer: {lawyerName}</Text> : null}
 
       {/* ⭐ Display average rating and review count */}
       <View style={styles.ratingContainer}>
@@ -111,8 +125,9 @@ export default function LawyerRatingReviewWidget({ lawyerId }) {
         <Text style={styles.reviewCount}>({reviews.length} reviews)</Text>
       </View>
 
-      {/* 🗒 Display all reviews */}
+      {/* 🗒 Scrollable reviews list */}
       <FlatList
+        ref={flatListRef}
         data={reviews}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
@@ -128,6 +143,7 @@ export default function LawyerRatingReviewWidget({ lawyerId }) {
         ListEmptyComponent={
           <Text style={styles.noReviews}>No reviews yet for this lawyer.</Text>
         }
+        style={{ maxHeight: 300 }}
       />
 
       {/* ✏️ Add new review section */}
@@ -156,7 +172,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 15,
     elevation: 2,
-    height: 700
   },
   title: { fontSize: 16, fontWeight: "bold", marginBottom: 10 },
   lawyerName: { fontSize: 14, color: "#333", marginBottom: 8 },
