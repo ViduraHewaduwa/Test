@@ -12,7 +12,7 @@ import {
 // Configure base URL - using fixed network IP for mobile environment
 const getApiBaseUrl = () => {
   // Always use the mobile network IP
-  return 'http://10.118.22.42:3000/api';
+  return 'http://192.168.1.9:3000/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
