@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, Alert, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { getLawyerReviews } from "../../../../../service/lawyerService";
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "../../../../../context/ThemeContext";
 
 const FeedbackSection = () => {
@@ -36,15 +43,30 @@ const FeedbackSection = () => {
 
   if (loading) {
     return (
-      <View style={[styles.card, styles.loadingContainer, { backgroundColor: colors.white }]}>
+      <View
+        style={[
+          styles.card,
+          styles.loadingContainer,
+          { backgroundColor: colors.white },
+        ]}
+      >
         <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.card, styles.fixedContainer, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
-      <Text style={[styles.sectionTitle, { color: colors.primary }]}>Feedback & Reviews</Text>
+  
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: colors.white, shadowColor: colors.shadow },
+      ]}
+    >
+     
+      <Text style={[styles.sectionTitle, { color: colors.primary }]}>
+        Feedback & Reviews
+      </Text>
       {reviewsList.length === 0 ? (
         <Text style={{ color: colors.secondary }}>No reviews yet.</Text>
       ) : (
@@ -52,21 +74,38 @@ const FeedbackSection = () => {
           data={reviewsList}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
-            <View style={[styles.reviewCard, { backgroundColor: colors.light }]}>
-              <View>
-                <Text style={[styles.userName, { color: colors.primary }]}>{item.userName || "Anonymous"}</Text>
-                <Text style={[styles.comment, { color: colors.secondary }]}>{item.comment}</Text>
+            <View
+              style={[styles.reviewCard, { backgroundColor: colors.light }]}
+            >
+              <View style={styles.reviewContent}>
+                <Text style={[styles.userName, { color: colors.primary }]}>
+                  {item.userName || "Anonymous"}
+                </Text>
+                <Text style={[styles.comment, { color: colors.secondary }]}>
+                  {item.comment}
+                </Text>
               </View>
               <View style={styles.ratingContainer}>
                 {[...Array(item.rating)].map((_, i) => (
-                  <Ionicons key={i} name="star" size={16} color={colors.star || "#FFD700"} />
+                  <Ionicons
+                    key={i}
+                    name="star"
+                    size={16}
+                    color={colors.star || "#FFD700"}
+                  />
                 ))}
               </View>
             </View>
           )}
+          showsVerticalScrollIndicator={true}
+          nestedScrollEnabled={true}
+          contentContainerStyle={styles.flatListContent}
+          style={{ flexGrow: 1 }} // Make FlatList expand
         />
       )}
+      
     </View>
+    
   );
 };
 
@@ -86,23 +125,39 @@ const styles = StyleSheet.create({
     height: 300, // Fixed height for the section
   },
   loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     height: 150,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 12,
   },
+  flatListContent: {
+    paddingBottom: 10,
+  },
   reviewCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     borderRadius: 12,
     padding: 12,
     marginBottom: 10,
   },
-  userName: { fontSize: 16, fontWeight: '600' },
-  comment: { marginTop: 4, fontSize: 13 },
-  ratingContainer: { flexDirection: 'row', alignItems: 'center' },
+  reviewContent: {
+    flex: 1,
+    marginRight: 8,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  comment: {
+    marginTop: 4,
+    fontSize: 13,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 });
