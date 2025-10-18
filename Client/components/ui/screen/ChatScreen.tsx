@@ -21,7 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 import { COLOR } from '@/constants/ColorPallet';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const API_URL = 'http://localhost:3000'; // Update with your server IP
+const API_URL = 'http://172.28.28.0:3000'; // Update with your server IP
 
 const ChatScreen = () => {
     const navigation = useNavigation();

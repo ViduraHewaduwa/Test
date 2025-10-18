@@ -45,20 +45,20 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ visible, post, onClos
   const getApiUrls = () => {
     if (Platform.OS === 'web') {
       return [
-        'http://192.168.1.9:3000/api',
-        'http://192.168.1.9:3000/api',
+        'http://172.28.28.0:3000/api',
+        'http://172.28.28.0:3000/api',
       ];
     } else if (Platform.OS === 'android') {
       return [
-        'http://192.168.1.9:3000/api',     // Android emulator
-        'http://192.168.1.9:3000/api',    // Your computer's IP
-        'http://192.168.1.9:3000/api',    // Fallback
+        'http://172.28.28.0:3000/api',     // Android emulator
+        'http://172.28.28.0:3000/api',    // Your computer's IP
+        'http://172.28.28.0:3000/api',    // Fallback
       ];
     } else {
       // iOS simulator
       return [
-        'http://192.168.1.9:3000/api',    // Your computer's IP
-        'http://192.168.1.9:3000/api',    // iOS simulator
+        'http://172.28.28.0:3000/api',    // Your computer's IP
+        'http://172.28.28.0:3000/api',    // iOS simulator
       ];
     }
   };

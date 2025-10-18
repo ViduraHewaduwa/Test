@@ -32,7 +32,7 @@ export default function MyAppointmentsScreen() {
   const fetchAppointments = async (userId: string) => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://192.168.1.9:3000/api/appointments/user/${userId}`);
+      const response = await axios.get(`http://172.28.28.0:3000/api/appointments/user/${userId}`);
       if (response.status === 200) {
         // Sort upcoming appointments first
         const sorted = response.data.appointments.sort(
