@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Platform } from 'react-native';
+import { API_URL_ENV } from '@env';
 
 interface User {
   id: string;
@@ -131,7 +132,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   //   }
   // };
   const getApiUrls = () => {
-  const localIp = "http://172.28.28.0:3000/api/auth"; // 👈 replace with your actual IP
+  const localIp = `${API_URL_ENV}/api/auth`; 
   return [localIp];
 };
 

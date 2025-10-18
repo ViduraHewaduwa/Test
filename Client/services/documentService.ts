@@ -8,11 +8,12 @@ import {
   UploadProgress,
   SupportedLanguage
 } from '@/types/document';
+import { API_URL_ENV } from '@env';
 
 // Configure base URL - using fixed network IP for mobile environment
 const getApiBaseUrl = () => {
   // Always use the mobile network IP
-  return 'http://172.28.26.224:3000/api';
+  return `${API_URL_ENV}/api`;
 };
 
 const API_BASE_URL = getApiBaseUrl();

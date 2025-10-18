@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTTS } from '../../hooks/useTTS';
+import { API_URL_ENV } from '@env';
 
 interface PostDetailModalProps {
   visible: boolean;
@@ -46,19 +47,19 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ visible, post, onClos
   const getApiUrls = () => {
     if (Platform.OS === 'web') {
       return [
-        'http://172.28.28.0:3000/api',
-        'http://172.28.28.0:3000/api',
+        `${API_URL_ENV}/api`,
+        `${API_URL_ENV}/api`,
       ];
     } else if (Platform.OS === 'android') {
       return [
-        'http://172.28.28.0:3000/api',
-        'http://172.28.28.0:3000/api',
-        'http://172.28.28.0:3000/api',
+        `${API_URL_ENV}/api`,
+        `${API_URL_ENV}/api`,
+        `${API_URL_ENV}/api`,
       ];
     } else {
       return [
-        'http://172.28.28.0:3000/api',
-        'http://172.28.28.0:3000/api',
+        `${API_URL_ENV}/api`,
+        `${API_URL_ENV}/api`,
       ];
     }
   };

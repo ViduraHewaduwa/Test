@@ -1,7 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL_ENV } from '@env';
 
-const API_URL = 'http://192.168.1.9:3000/api/ngo';
+const API_URL = `${API_URL_ENV}/api/ngo`;
 
 // Create axios instance
 const api = axios.create({

@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_URL_ENV } from '@env';
 
 // Change this to your backend URL (localhost or LAN IP)
-const APPOINTMENT_API_URL = "http://172.28.28.0:3000/api/appointments"; // Backend endpoint
+const APPOINTMENT_API_URL = `${API_URL_ENV}/api/appointments`; // Backend endpoint
 
 // Create a new appointment
 export const createAppointment = async (appointmentData) => {

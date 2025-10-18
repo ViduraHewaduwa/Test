@@ -8,6 +8,7 @@ import CategoryFilter from '@/components/ui/screen/widget/NgoScreen/NgoCategoryF
 import NgoList from '@/components/ui/screen/widget/NgoScreen/NgoListWidget';
 import LoadingOverlay from '@/components/ui/screen/widget/NgoScreen/LoadingOverlayWidget';
 import TopNgosSection from '@/components/ui/screen/widget/NgoScreen/TopNgosSection';
+import { API_URL_ENV } from '@env';
 
 // @ts-ignore
 export default function NgoScreen({ navigation }) {
@@ -37,8 +38,8 @@ export default function NgoScreen({ navigation }) {
 
     // API configuration
     const getApiUrl = () => {
-        const DEV_IP = '172.28.28.0'; //192.168.8.189
-        return `http://${DEV_IP}:3000/api/ngo`;
+        const DEV_IP = `${API_URL_ENV}`; //192.168.8.189
+        return `http://${DEV_IP}/api/ngo`;
     };
 
     const API_BASE_URL = getApiUrl();

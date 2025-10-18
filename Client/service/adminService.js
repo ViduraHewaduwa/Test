@@ -1,7 +1,7 @@
 import axios from "axios";
-
+import { API_URL_ENV } from '@env';
 // Change this to your backend URL (localhost or LAN IP)
-const ADMIN_API_URL = "http://172.28.28.0:3000/api/admins"; // Web backend
+const ADMIN_API_URL = `${API_URL_ENV}/api/admins`; // Web backend
 
 // Register a new admin
 export const registerAdmin = async (adminData) => {

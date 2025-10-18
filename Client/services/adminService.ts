@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL_ENV } from '@env';
 
 const API_URLS = [
-  'http://172.28.28.0:3000/api/admin',
-  'http://172.28.28.0:3000/api/admin',
-  'http://172.28.28.0:3000/api/admin',
+  `${API_URL_ENV}/api/admin`,
+  
 ];
 
 class AdminService {

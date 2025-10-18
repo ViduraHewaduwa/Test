@@ -1,14 +1,15 @@
 import { Platform } from 'react-native';
+import { API_URL_ENV } from '@env';
 
 // Get API URL based on platform
 const getBaseUrl = () => {
   if (Platform.OS === 'web') {
-    return 'http://172.28.28.0:3000/api';
+    return '${API_URL_ENV}/api';
   } else if (Platform.OS === 'android') {
     // Try multiple URLs for Android
-    return 'http://172.28.28.0:3000/api';
+    return '${API_URL_ENV}/api';
   }
-  return 'http://172.28.28.0:3000/api';
+  return '${API_URL_ENV}/api';
 };
 
 const BASE_URL = getBaseUrl();

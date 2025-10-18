@@ -28,8 +28,10 @@ import { useTTS } from "../../../hooks/useTTS";
 import notificationService, {
   Notification,
 } from "../../../services/notificationService";
+import { API_URL_ENV } from '@env';
 
 const { width } = Dimensions.get("window");
+
 
 // Define interfaces for better type safety
 interface ForumPost {
@@ -221,20 +223,20 @@ const ForumsScreen = () => {
   const getApiUrls = () => {
       if (Platform.OS === 'web') {
           return [
-              'http://172.28.28.0:3000/api',
-              'http://172.28.28.0:3000/api',
+              `${API_URL_ENV}/api`,
+              `${API_URL_ENV}/api`,
           ];
       } else if (Platform.OS === 'android') {
           return [
-              'http://172.28.28.0:3000/api',     // Android emulator
-              'http://172.28.28.0:3000/api',    // Your computer's IP
-              'http://172.28.28.0:3000/api',    // Fallback
+              `${API_URL_ENV}/api`,     // Android emulator
+              `${API_URL_ENV}/api`,    // Your computer's IP
+              `${API_URL_ENV}/api`,    // Fallback
           ];
       } else {
           // iOS simulator
           return [
-              'http://172.28.28.0:3000/api',    // Your computer's IP
-              'http://172.28.28.0:3000/api',    // iOS simulator
+              `${API_URL_ENV}/api`,    // Your computer's IP
+              `${API_URL_ENV}/api`,    // iOS simulator
           ];
       }
   };

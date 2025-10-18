@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
+import { API_URL_ENV } from '@env';
 
 // @ts-ignore
 export default function NgoProfileScreen({route, navigation }) {
@@ -24,8 +25,8 @@ export default function NgoProfileScreen({route, navigation }) {
 
     // API configuration
     const getApiUrl = () => {
-        const DEV_IP = '172.28.28.0'; //192.168.8.189
-        return `http://${DEV_IP}:3000/api/ngo`;
+        const DEV_IP = `${API_URL_ENV}`; //192.168.8.189
+        return `http://${DEV_IP}/api/ngo`;
     };
 
     const API_BASE_URL = getApiUrl();
