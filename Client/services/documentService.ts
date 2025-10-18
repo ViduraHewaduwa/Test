@@ -16,10 +16,10 @@ const getApiBaseUrl = () => {
     // Use localhost for web development, network IP for mobile
     if (typeof window !== 'undefined' && window.location) {
       // Web environment - use localhost
-      return 'http://192.168.1.9:3000/api';
+      return 'http://172.28.28.0:3000/api';
     } else {
       // Mobile environment - use network IP
-      return 'http://192.168.1.9:3000/api';
+      return 'http://172.28.28.0:3000/api';
     }
   }
   

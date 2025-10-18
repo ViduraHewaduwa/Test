@@ -110,7 +110,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
-
   // Platform-specific API URL configuration with fallback options
   // const getApiUrls = () => {
   //   if (Platform.OS === 'web') {

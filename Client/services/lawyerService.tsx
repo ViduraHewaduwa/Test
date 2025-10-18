@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // 👇 change to your backend URL
-const API_URL = "http://192.168.1.9:3000/api/lawyers"; 
+const API_URL = "http://172.28.28.0:3000/api/lawyers"; 
 // If using device/emulator, use your machine's IP instead of localhost.
 
 export const getAllLawyers = async () => {

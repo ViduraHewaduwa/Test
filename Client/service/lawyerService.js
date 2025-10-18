@@ -1,8 +1,8 @@
 import axios from "axios";
 
 // Change this to your backend URL (localhost or LAN IP)
-const API_URL = "http://192.168.1.9:3000/api/auth/lawyers"; // Web
-const API_URL_LAWYER_PROFILE = "http://192.168.1.9:3000/api/lawyers";
+const API_URL = "http://172.28.28.0:3000/api/auth/lawyers"; // Web
+const API_URL_LAWYER_PROFILE = "http://172.28.28.0:3000/api/lawyers";
 
 
 
