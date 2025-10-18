@@ -6,18 +6,21 @@ import {
   FlatList,
   Alert,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getLawyerReviews } from "../../../../../service/lawyerService";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "../../../../../context/ThemeContext";
 
+const { width } = Dimensions.get("window");
+const PAGE_WIDTH = width - 40; // keep margins on sides
+
 const FeedbackSection = () => {
   const { colors } = useTheme();
-  const [lawyerName, setLawyerName] = useState("");
-  const [averageRating, setAverageRating] = useState(0);
   const [reviewsList, setReviewsList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const { user } = useAuth();
 
@@ -26,8 +29,6 @@ const FeedbackSection = () => {
       try {
         const data = await getLawyerReviews(user.id);
         if (data?.success) {
-          setLawyerName(data.lawyerName);
-          setAverageRating(data.rating);
           setReviewsList(data.reviews || []);
         }
       } catch (error) {
@@ -55,57 +56,111 @@ const FeedbackSection = () => {
     );
   }
 
+  if (reviewsList.length === 0) {
+    return (
+      <View style={[styles.card, { backgroundColor: colors.white }]}>
+        <Text style={[styles.sectionTitle, { color: colors.primary }]}>
+          Feedback & Reviews
+        </Text>
+        <Text style={{ color: colors.secondary }}>No reviews yet.</Text>
+      </View>
+    );
+  }
+
+  // Split reviews into chunks of 5 per page
+  const chunkReviews = (arr, size) => {
+    return arr.reduce((acc, _, i) => {
+      if (i % size === 0) acc.push(arr.slice(i, i + size));
+      return acc;
+    }, []);
+  };
+
+  const paginatedReviews = chunkReviews(reviewsList, 5);
+
+  const handleScroll = (event) => {
+    const pageIndex = Math.round(event.nativeEvent.contentOffset.x / PAGE_WIDTH);
+    setCurrentPage(pageIndex);
+  };
+
   return (
-  
     <View
       style={[
         styles.card,
         { backgroundColor: colors.white, shadowColor: colors.shadow },
       ]}
     >
-     
       <Text style={[styles.sectionTitle, { color: colors.primary }]}>
         Feedback & Reviews
       </Text>
-      {reviewsList.length === 0 ? (
-        <Text style={{ color: colors.secondary }}>No reviews yet.</Text>
-      ) : (
+
+      <View style={styles.sliderContainer}>
         <FlatList
-          data={reviewsList}
-          keyExtractor={(item, index) => index.toString()}
+          data={paginatedReviews}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, index) => index.toString()}
+          onScroll={handleScroll}
           renderItem={({ item }) => (
             <View
-              style={[styles.reviewCard, { backgroundColor: colors.light }]}
+              style={{
+                width: PAGE_WIDTH,
+                alignSelf: "center",
+              }}
             >
-              <View style={styles.reviewContent}>
-                <Text style={[styles.userName, { color: colors.primary }]}>
-                  {item.userName || "Anonymous"}
-                </Text>
-                <Text style={[styles.comment, { color: colors.secondary }]}>
-                  {item.comment}
-                </Text>
-              </View>
-              <View style={styles.ratingContainer}>
-                {[...Array(item.rating)].map((_, i) => (
-                  <Ionicons
-                    key={i}
-                    name="star"
-                    size={16}
-                    color={colors.star || "#FFD700"}
-                  />
-                ))}
-              </View>
+              {item.map((review, index) => (
+                <View
+                  key={index}
+                  style={[styles.reviewCard, { backgroundColor: colors.light }]}
+                >
+                  <View style={styles.reviewContent}>
+                    <Text style={[styles.userName, { color: colors.primary }]}>
+                      {review.firstName || "Anonymous"}
+                    </Text>
+                    <Text style={[styles.comment, { color: colors.secondary }]}>
+                      {review.comment}
+                    </Text>
+                  </View>
+                  <View style={styles.ratingContainer}>
+                    {[...Array(review.rating)].map((_, i) => (
+                      <Ionicons
+                        key={i}
+                        name="star"
+                        size={16}
+                        color={colors.star || "#FFD700"}
+                      />
+                    ))}
+                  </View>
+                </View>
+              ))}
             </View>
           )}
-          showsVerticalScrollIndicator={true}
-          nestedScrollEnabled={true}
-          contentContainerStyle={styles.flatListContent}
-          style={{ flexGrow: 1 }} // Make FlatList expand
+          decelerationRate="fast"
+          snapToAlignment="center"
+          snapToInterval={PAGE_WIDTH}
+          contentContainerStyle={{
+            alignItems: "center",
+          }}
         />
-      )}
-      
+      </View>
+
+      {/* Pagination Dots */}
+      <View style={styles.pagination}>
+        {paginatedReviews.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              {
+                backgroundColor:
+                  currentPage === index ? colors.primary : colors.secondary,
+                transform: [{ scale: currentPage === index ? 1.2 : 1 }],
+              },
+            ]}
+          />
+        ))}
+      </View>
     </View>
-    
   );
 };
 
@@ -114,15 +169,13 @@ export default FeedbackSection;
 const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    paddingVertical: 16,
+    marginHorizontal: 20,
+    marginBottom: 20,
     elevation: 3,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-  },
-  fixedContainer: {
-    height: 300, // Fixed height for the section
   },
   loadingContainer: {
     justifyContent: "center",
@@ -132,17 +185,26 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 12,
+    marginBottom: 14,
+    textAlign: "center",
   },
-  flatListContent: {
-    paddingBottom: 10,
+  sliderContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   reviewCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
+    padding: 10,
+    marginVertical: 6,
+    width: PAGE_WIDTH - 32,
+    alignSelf: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 3,
+    elevation: 1,
   },
   reviewContent: {
     flex: 1,
@@ -155,9 +217,22 @@ const styles = StyleSheet.create({
   comment: {
     marginTop: 4,
     fontSize: 13,
+    lineHeight: 18,
   },
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 5,
   },
 });

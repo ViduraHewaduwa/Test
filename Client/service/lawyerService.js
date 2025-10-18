@@ -110,5 +110,6 @@ export const rateLawyer = async (lawyerId, ratingData, token) => {
 
 export const getLawyerReviews = async (lawyerId) => {
   const response = await axios.get(`${API_URL_LAWYER_PROFILE}/${lawyerId}/review`);
+  console.log("reviews : ",response.data)
   return response.data;
 };
