@@ -12,7 +12,7 @@ import {
 // Configure base URL - using fixed network IP for mobile environment
 const getApiBaseUrl = () => {
   // Always use the mobile network IP
-  return 'http://10.118.22.42:3000/api';
+  return 'http://10.170.136.42:3000/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -378,46 +378,70 @@ export class DocumentService {
       
       // Handle file for React Native/Expo environment
       // Use the file object directly as-is from DocumentPicker
-      if (file.uri) {
-        // React Native/Expo environment
-        console.log('📱 Using file with URI:', file.uri);
-        formData.append('document', {
-          uri: file.uri,
-          type: file.type || 'application/pdf',
-          name: file.name,
-        } as any);
-      } else if (file instanceof File || file instanceof Blob) {
-        // Web File/Blob object
-        console.log('🌐 Using File/Blob object');
-        const fileName = file instanceof File ? file.name : 'document.pdf';
-        formData.append('document', file, fileName);
-      } else {
-        throw new Error('Unsupported file format');
+      try {
+        if (file.uri) {
+          // React Native/Expo environment
+          console.log('📱 Using file with URI:', file.uri);
+          console.log('📱 File details:', JSON.stringify(file, null, 2));
+          
+          // Ensure we have all required fields
+          const fileObject: any = {
+            uri: file.uri,
+            type: file.mimeType || file.type || 'application/pdf',
+            name: file.name,
+          };
+          
+          console.log('📦 FormData file object:', JSON.stringify(fileObject, null, 2));
+          formData.append('document', fileObject);
+        } else if (file instanceof File || file instanceof Blob) {
+          // Web File/Blob object
+          console.log('🌐 Using File/Blob object');
+          const fileName = file instanceof File ? file.name : 'document.pdf';
+          formData.append('document', file, fileName);
+        } else {
+          throw new Error('Unsupported file format - file must have uri property or be File/Blob instance');
+        }
+        
+        formData.append('language', language);
+        console.log('✅ FormData prepared successfully');
+      } catch (formDataError: any) {
+        console.error('❌ Error preparing FormData:', formDataError);
+        throw new Error(`Failed to prepare file upload: ${formDataError.message}`);
       }
-      
-      formData.append('language', language);
 
       const uploadUrl = API_BASE_URL + '/documents/explain';
       console.log('🔗 Making API request to:', uploadUrl);
       
-      const response = await api.post('/documents/explain', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Accept': 'application/json',
-        },
-        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-          if (onProgress && progressEvent.total) {
-            const progress: UploadProgress = {
-              loaded: progressEvent.loaded,
-              total: progressEvent.total,
-              percentage: Math.round((progressEvent.loaded * 100) / progressEvent.total)
-            };
-            console.log('📈 Upload progress:', progress.percentage + '%');
-            onProgress(progress);
-          }
-        },
-        timeout: 120000 // 2 minutes for AI processing
-      });
+      let response;
+      try {
+        response = await api.post('/documents/explain', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
+          },
+          onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+            if (onProgress && progressEvent.total) {
+              const progress: UploadProgress = {
+                loaded: progressEvent.loaded,
+                total: progressEvent.total,
+                percentage: Math.round((progressEvent.loaded * 100) / progressEvent.total)
+              };
+              console.log('📈 Upload progress:', progress.percentage + '%');
+              onProgress(progress);
+            }
+          },
+          timeout: 120000 // 2 minutes for AI processing
+        });
+      } catch (apiError: any) {
+        console.error('❌ API Request Error:', apiError);
+        console.error('❌ Error details:', {
+          message: apiError.message,
+          code: apiError.code,
+          response: apiError.response?.data,
+          status: apiError.response?.status
+        });
+        throw apiError; // Re-throw to be handled by outer catch
+      }
 
       console.log('✅ API response received:', response.status, response.data);
 
