@@ -14,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
+import { API_URL_ENV } from '@env';
 
 export default function MyAppointmentsScreen() {
   const { colors } = useTheme();
@@ -32,7 +33,7 @@ export default function MyAppointmentsScreen() {
   const fetchAppointments = async (userId: string) => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://172.28.28.0:3000/api/appointments/user/${userId}`);
+      const response = await axios.get(`${API_URL_ENV}/api/appointments/user/${userId}`);
       if (response.status === 200) {
         // Sort upcoming appointments first
         const sorted = response.data.appointments.sort(

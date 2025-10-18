@@ -27,6 +27,7 @@ interface RegistrationFormProps {
   onLoginPress: () => void;
   onGenderPress: () => void;
   onCategoryPress: () => void;
+   onSpecializationPress: () => void; 
 }
 
 const RegistrationForm: React.FC<RegistrationFormProps> = ({
@@ -40,6 +41,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   onLoginPress,
   onGenderPress,
   onCategoryPress,
+  onSpecializationPress,
 }) => {
   const { colors } = useTheme();
 
@@ -148,13 +150,14 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
           />
         );
       case 'lawyer':
-        return (
-          <LawyerForm
-            formData={formData}
-            errors={errors}
-            updateFormData={updateFormData}
-          />
-        );
+  return (
+    <LawyerForm
+      formData={formData}
+      errors={errors}
+      updateFormData={updateFormData}
+      onSpecializationPress={onSpecializationPress}
+    />
+  );
       case 'ngo':
         return (
           <NgoForm
