@@ -44,6 +44,65 @@ export default function NgoScreen({ navigation }) {
 
     const API_BASE_URL = getApiUrl();
 
+    // Helper function to normalize image URIs
+    const getImageUri = (logo) => {
+        // Check if logo is null, undefined, or not a string
+        if (!logo || typeof logo !== 'string') {
+            console.log('Invalid logo value:', logo);
+            return null;
+        }
+
+        // If it's already a full URL (http:// or https://)
+        if (logo.startsWith('http://') || logo.startsWith('https://')) {
+            console.log('Full URL detected:', logo);
+            return logo;
+        }
+
+        // If it's a blob URL, log warning and return null
+        if (logo.startsWith('blob:')) {
+            console.warn('Blob URL detected (not supported):', logo);
+            return null;
+        }
+
+        // If it's a relative path, construct full URL
+        const DEV_IP = '172.28.28.0';
+        const baseUrl = `http://${DEV_IP}:3000`;
+        const fullUrl = `${baseUrl}${logo.startsWith('/') ? logo : '/' + logo}`;
+        console.log('Constructed image URL:', fullUrl);
+        return fullUrl;
+    };
+
+    // Process NGO data to normalize image URIs
+    const processNgoData = (ngoArray) => {
+        if (!Array.isArray(ngoArray)) {
+            console.error('processNgoData received non-array:', ngoArray);
+            return [];
+        }
+
+        return ngoArray.map(ngo => {
+            try {
+                return {
+                    ...ngo,
+                    logo: getImageUri(ngo.logo),
+                    // Also handle any other image fields if they exist
+                    coverImage: ngo.coverImage ? getImageUri(ngo.coverImage) : null,
+                    images: Array.isArray(ngo.images)
+                        ? ngo.images.map(img => getImageUri(img)).filter(uri => uri !== null)
+                        : []
+                };
+            } catch (error) {
+                console.error('Error processing NGO:', ngo._id, error);
+                // Return NGO with null images on error
+                return {
+                    ...ngo,
+                    logo: null,
+                    coverImage: null,
+                    images: []
+                };
+            }
+        });
+    };
+
     // Effects
     useEffect(() => {
         fetchTopNgos();
@@ -67,7 +126,10 @@ export default function NgoScreen({ navigation }) {
             const data = await response.json();
 
             if (data.message === 'top' && data.data) {
-                setTopNgos(data.data);
+                // Process the data to normalize image URIs
+                const processedData = processNgoData(data.data);
+                setTopNgos(processedData);
+                console.log('Top NGOs loaded:', processedData.length);
             }
         } catch (error) {
             console.error('Fetch Top NGOs error:', error);
@@ -115,15 +177,20 @@ export default function NgoScreen({ navigation }) {
             });
 
             if (data.message === 'list' && data.data) {
+                // Process the data to normalize image URIs
+                const processedData = processNgoData(data.data);
+
                 if (isRefresh || currentPage === 1) {
-                    setNgos(data.data);
+                    setNgos(processedData);
                 } else {
                     // @ts-ignore
-                    setNgos(prev => [...prev, ...data.data]);
+                    setNgos(prev => [...prev, ...processedData]);
                 }
 
                 setTotalPages(data.pagination?.totalPages || 1);
                 setHasNext(data.pagination?.hasNext || false);
+
+                console.log('NGOs loaded and processed:', processedData.length);
             }
         } catch (error) {
             Alert.alert('Error', 'Failed to fetch NGOs. Please try again.');

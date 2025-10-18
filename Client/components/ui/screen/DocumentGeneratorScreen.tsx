@@ -18,7 +18,7 @@ import { COLOR } from '@/constants/ColorPallet';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://172.28.28.0:3000';
 
 // @ts-ignore
 const DocumentGeneratorScreen = ({ navigation }) => {
