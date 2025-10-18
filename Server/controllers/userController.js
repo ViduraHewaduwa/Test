@@ -490,8 +490,6 @@ const getAllLawyers = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   registerUser,
   loginUser,
