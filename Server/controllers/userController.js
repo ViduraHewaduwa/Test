@@ -406,25 +406,14 @@ const getAllowedUpdateFields = (role) => {
 
 const getAllLawyers = async (req, res) => {
   try {
-    const {
-      searchText = "",
-      page = 1,
-      size = 10,
-      category = "",
-    } = req.query;
+    const { searchText = "", page = 1, size = 10, category = "" } = req.query;
 
     const pageNumber = parseInt(page);
     const pageSize = parseInt(size);
 
-    // Initial filter: only accepted lawyers
-    const filter = {
-      role: "lawyer",
-      lawyerStatus: "accepted",
-    };
+    const filter = { role: "lawyer", lawyerStatus: "accepted" };
 
-    if (category) {
-      filter.specialization = category;
-    }
+    if (category) filter.specialization = category;
 
     if (searchText) {
       filter.$or = [
@@ -434,46 +423,26 @@ const getAllLawyers = async (req, res) => {
       ];
     }
 
-    // Define tier priority for sorting
-    const tierPriority = {
-      "Champion of Justice": 5,
-      "Legal Mentor": 4,
-      "Justice Advocate": 3,
-      "Legal Helper": 2,
-      "Community Ally": 1,
-    };
-
     // Count total matching lawyers
     const total = await User.countDocuments(filter);
 
-    // Fetch all matching lawyers (no pagination yet)
+    // Fetch lawyers sorted by totalPoints descending, then newest first
     const lawyers = await User.find(filter)
       .select("-password")
+      .sort({ totalPoints: -1, createdAt: -1 }) // <-- sort by points first
+      .skip((pageNumber - 1) * pageSize)
+      .limit(pageSize)
       .lean();
 
-    // Sort by tier priority and createdAt
-    const sortedLawyers = lawyers.sort((a, b) => {
-      const tierA = tierPriority[a.tier] || 0;
-      const tierB = tierPriority[b.tier] || 0;
-      if (tierA !== tierB) return tierB - tierA;
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    });
-
-    // Paginate
-    const startIndex = (pageNumber - 1) * pageSize;
-    const paginatedLawyers = sortedLawyers.slice(startIndex, startIndex + pageSize);
-
-    // Fetch lawyer profiles for the paginated lawyers
-    const lawyerIds = paginatedLawyers.map(l => l._id);
+    // Fetch profiles
+    const lawyerIds = lawyers.map(l => l._id);
     const profiles = await LawyerProfile.find({ lawyer: { $in: lawyerIds } })
       .select("-__v -updatedAt")
       .lean();
 
-    // Combine lawyers with their profiles
-    const combined = paginatedLawyers.map(lawyer => {
+    const combined = lawyers.map(lawyer => {
       const profile = profiles.find(p => p.lawyer.toString() === lawyer._id.toString());
 
-      // Construct profilePicture URL (same logic as getProfile)
       let profilePictureUrl = null;
       if (profile?.profilePicture) {
         if (profile.profilePicture.startsWith("http://") || profile.profilePicture.startsWith("https://")) {
@@ -501,16 +470,16 @@ const getAllLawyers = async (req, res) => {
     const totalPages = Math.ceil(total / pageSize);
 
     return res.status(200).json({
-  message: "list",
-  data: combined,
-  pagination: {
-    count: total,
-    currentPage: pageNumber,
-    totalPages,
-    hasNext: pageNumber < totalPages,
-    hasPrev: pageNumber > 1,
-  },
-});
+      message: "list",
+      data: combined,
+      pagination: {
+        count: total,
+        currentPage: pageNumber,
+        totalPages,
+        hasNext: pageNumber < totalPages,
+        hasPrev: pageNumber > 1,
+      },
+    });
   } catch (error) {
     console.error("❌ Error fetching lawyers:", error);
     return res.status(500).json({
@@ -520,7 +489,6 @@ const getAllLawyers = async (req, res) => {
     });
   }
 };
-
 
 
 
