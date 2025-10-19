@@ -47,19 +47,19 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ visible, post, onClos
   const getApiUrls = () => {
     if (Platform.OS === 'web') {
       return [
-        `${API_URL_ENV}/api`,
-        `${API_URL_ENV}/api`,
+        `http://172.28.1.166:3000/api`,
+        `http://172.28.1.166:3000/api`,
       ];
     } else if (Platform.OS === 'android') {
       return [
-        `${API_URL_ENV}/api`,
-        `${API_URL_ENV}/api`,
-        `${API_URL_ENV}/api`,
+        `http://172.28.1.166:3000/api`,
+        `http://172.28.1.166:3000/api`,
+        `http://172.28.1.166:3000/api`,
       ];
     } else {
       return [
-        `${API_URL_ENV}/api`,
-        `${API_URL_ENV}/api`,
+        `http://172.28.1.166:3000/api`,
+        `http://172.28.1.166:3000/api`,
       ];
     }
   };

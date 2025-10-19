@@ -38,7 +38,7 @@ export default function NgoScreen({ navigation }) {
 
     // API configuration
     const getApiUrl = () => {
-        const DEV_IP = API_URL_ENV; //192.168.8.189
+        const DEV_IP = "http://172.28.1.166:3000"; //192.168.8.189
         return `${DEV_IP}/api/ngo`;
     };
 

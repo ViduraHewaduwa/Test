@@ -34,10 +34,10 @@ export default function DocumentAnalyseScreen() {
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
+
   // Analysis options
   const [analysisLanguage, setAnalysisLanguage] = useState<'english' | 'sinhala' | 'tamil'>('english');
-  
+
   // Results
   const [analysisResults, setAnalysisResults] = useState<{
     explanation?: string;
@@ -49,14 +49,11 @@ export default function DocumentAnalyseScreen() {
   // Handle back navigation
   const handleBack = () => {
     if (currentStep === 'results') {
-      // From results, go back to configure
       setCurrentStep('configure');
     } else if (currentStep === 'configure') {
-      // From configure, go back to select and clear file
       setCurrentStep('select');
       setSelectedFile(null);
     }
-    // If on select step, do nothing (already at the beginning)
   };
 
   // Reset to start over
@@ -86,8 +83,7 @@ export default function DocumentAnalyseScreen() {
           size: file.size,
           mimeType: file.mimeType || 'application/pdf',
         });
-        
-        // Move to configuration step
+
         setCurrentStep('configure');
       }
     } catch (error) {
@@ -107,13 +103,12 @@ export default function DocumentAnalyseScreen() {
     setUploadProgress(0);
 
     try {
-      // Use the explainDocument method which handles upload and analysis
       const response = await DocumentService.explainDocument(
-        selectedFile,
-        analysisLanguage,
-        (progress) => {
-          setUploadProgress(progress.percentage);
-        }
+          selectedFile,
+          analysisLanguage,
+          (progress) => {
+            setUploadProgress(progress.percentage);
+          }
       );
 
       if (response.success) {
@@ -139,254 +134,266 @@ export default function DocumentAnalyseScreen() {
 
   // Render Step Indicator
   const renderStepIndicator = () => (
-    <View style={styles.stepIndicator}>
-      <View style={styles.stepItem}>
-        <View style={[styles.stepCircle, currentStep === 'select' && styles.stepCircleActive]}>
-          <Ionicons 
-            name={currentStep !== 'select' ? "checkmark" : "document"} 
-            size={20} 
-            color={currentStep !== 'select' ? "#4CAF50" : "#007AFF"} 
-          />
+      <View style={styles.stepIndicator}>
+        <View style={styles.stepItem}>
+          <View style={[styles.stepCircle, currentStep === 'select' && styles.stepCircleActive]}>
+            <Ionicons
+                name={currentStep !== 'select' ? "checkmark" : "document"}
+                size={20}
+                color={currentStep !== 'select' ? "#4CAF50" : "#007AFF"}
+            />
+          </View>
+          <Text style={styles.stepText}>Select PDF</Text>
         </View>
-        <Text style={styles.stepText}>Select PDF</Text>
-      </View>
 
-      <View style={styles.stepLine} />
+        <View style={styles.stepLine} />
 
-      <View style={styles.stepItem}>
-        <View style={[styles.stepCircle, currentStep === 'configure' && styles.stepCircleActive]}>
-          <Ionicons 
-            name={currentStep === 'results' ? "checkmark" : "settings"} 
-            size={20} 
-            color={currentStep === 'results' ? "#4CAF50" : currentStep === 'configure' ? "#007AFF" : "#ccc"} 
-          />
+        <View style={styles.stepItem}>
+          <View style={[styles.stepCircle, currentStep === 'configure' && styles.stepCircleActive]}>
+            <Ionicons
+                name={currentStep === 'results' ? "checkmark" : "settings"}
+                size={20}
+                color={currentStep === 'results' ? "#4CAF50" : currentStep === 'configure' ? "#007AFF" : "#ccc"}
+            />
+          </View>
+          <Text style={styles.stepText}>Configure</Text>
         </View>
-        <Text style={styles.stepText}>Configure</Text>
-      </View>
 
-      <View style={styles.stepLine} />
+        <View style={styles.stepLine} />
 
-      <View style={styles.stepItem}>
-        <View style={[styles.stepCircle, currentStep === 'results' && styles.stepCircleActive]}>
-          <Ionicons 
-            name="eye" 
-            size={20} 
-            color={currentStep === 'results' ? "#007AFF" : "#ccc"} 
-          />
+        <View style={styles.stepItem}>
+          <View style={[styles.stepCircle, currentStep === 'results' && styles.stepCircleActive]}>
+            <Ionicons
+                name="eye"
+                size={20}
+                color={currentStep === 'results' ? "#007AFF" : "#ccc"}
+            />
+          </View>
+          <Text style={styles.stepText}>Results</Text>
         </View>
-        <Text style={styles.stepText}>Results</Text>
       </View>
-    </View>
   );
 
   // Render Step 1: Select Document
   const renderSelectStep = () => (
-    <View style={styles.stepContent}>
-      <View style={styles.uploadArea}>
-        <Ionicons name="cloud-upload-outline" size={80} color="#007AFF" />
-        <Text style={styles.uploadTitle}>Upload Legal Document</Text>
-        <Text style={styles.uploadSubtitle}>Select a PDF file for AI analysis</Text>
-        
-        <TouchableOpacity style={styles.selectButton} onPress={handleSelectFile}>
-          <Ionicons name="folder-open-outline" size={24} color="#fff" />
-          <Text style={styles.selectButtonText}>Select PDF Document</Text>
-        </TouchableOpacity>
+      <ScrollView
+          style={styles.stepContent}
+          contentContainerStyle={styles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.uploadArea}>
+          <Ionicons name="cloud-upload-outline" size={80} color="#007AFF" />
+          <Text style={styles.uploadTitle}>Upload Legal Document</Text>
+          <Text style={styles.uploadSubtitle}>Select a PDF file for AI analysis</Text>
 
-        <View style={styles.infoBox}>
-          <Ionicons name="information-circle-outline" size={20} color="#007AFF" />
-          <Text style={styles.infoText}>
-            Only PDF files are supported. The AI will analyze and explain the document in your chosen language.
-          </Text>
+          <TouchableOpacity style={styles.selectButton} onPress={handleSelectFile}>
+            <Ionicons name="folder-open-outline" size={24} color="#fff" />
+            <Text style={styles.selectButtonText}>Select PDF Document</Text>
+          </TouchableOpacity>
+
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle-outline" size={20} color="#007AFF" />
+            <Text style={styles.infoText}>
+              Only PDF files are supported. The AI will analyze and explain the document in your chosen language.
+            </Text>
+          </View>
         </View>
-      </View>
-    </View>
+      </ScrollView>
   );
 
   // Render Step 2: Configure Analysis
   const renderConfigureStep = () => (
-    <View style={styles.stepContent}>
-      <View style={styles.configCard}>
-        <View style={styles.fileInfoCard}>
-          <Ionicons name="document-text" size={48} color="#007AFF" />
-          <Text style={styles.fileName}>{selectedFile?.name || 'No file'}</Text>
-          <Text style={styles.fileSize}>
-            {selectedFile?.size ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : ''}
-          </Text>
-          
-          <TouchableOpacity style={styles.changeFileButton} onPress={() => setCurrentStep('select')}>
-            <Ionicons name="swap-horizontal" size={18} color="#007AFF" />
-            <Text style={styles.changeFileText}>Change File</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.languageSection}>
-          <Text style={styles.sectionTitle}>Analysis Language</Text>
-          <Text style={styles.sectionSubtitle}>
-            Select the language for AI explanation and summary
-          </Text>
-          
-          <View style={styles.languagePickerContainer}>
-            <Picker
-              selectedValue={analysisLanguage}
-              onValueChange={(value) => setAnalysisLanguage(value as 'english' | 'sinhala' | 'tamil')}
-              style={styles.languagePicker}
-            >
-              {LANGUAGES.map((lang) => (
-                <Picker.Item key={lang.value} label={lang.label} value={lang.value} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={styles.analyzeButton}
-          onPress={handleAnalyze}
-          disabled={analyzing}
-        >
-          {analyzing ? (
-            <>
-              <ActivityIndicator color="#fff" size="small" />
-              <Text style={styles.analyzeButtonText}>
-                Analyzing... {uploadProgress}%
-              </Text>
-            </>
-          ) : (
-            <>
-              <Ionicons name="flash" size={24} color="#fff" />
-              <Text style={styles.analyzeButtonText}>Analyze Document</Text>
-            </>
-          )}
-        </TouchableOpacity>
-
-        {analyzing && (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${uploadProgress}%` }]} />
-            </View>
-            <Text style={styles.progressText}>
-              {uploadProgress < 50 ? 'Uploading document...' : 'AI is analyzing...'}
+      <ScrollView
+          style={styles.stepContent}
+          contentContainerStyle={styles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.configCard}>
+          <View style={styles.fileInfoCard}>
+            <Ionicons name="document-text" size={48} color="#007AFF" />
+            <Text style={styles.fileName}>{selectedFile?.name || 'No file'}</Text>
+            <Text style={styles.fileSize}>
+              {selectedFile?.size ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : ''}
             </Text>
+
+            <TouchableOpacity style={styles.changeFileButton} onPress={() => setCurrentStep('select')}>
+              <Ionicons name="swap-horizontal" size={18} color="#007AFF" />
+              <Text style={styles.changeFileText}>Change File</Text>
+            </TouchableOpacity>
           </View>
-        )}
-      </View>
-    </View>
+
+          <View style={styles.languageSection}>
+            <Text style={styles.sectionTitle}>Analysis Language</Text>
+            <Text style={styles.sectionSubtitle}>
+              Select the language for AI explanation and summary
+            </Text>
+
+            <View style={styles.languagePickerContainer}>
+              <Picker
+                  selectedValue={analysisLanguage}
+                  onValueChange={(value) => setAnalysisLanguage(value as 'english' | 'sinhala' | 'tamil')}
+                  style={styles.languagePicker}
+              >
+                {LANGUAGES.map((lang) => (
+                    <Picker.Item key={lang.value} label={lang.label} value={lang.value} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+
+          <TouchableOpacity
+              style={styles.analyzeButton}
+              onPress={handleAnalyze}
+              disabled={analyzing}
+          >
+            {analyzing ? (
+                <>
+                  <ActivityIndicator color="#fff" size="small" />
+                  <Text style={styles.analyzeButtonText}>
+                    Analyzing... {uploadProgress}%
+                  </Text>
+                </>
+            ) : (
+                <>
+                  <Ionicons name="flash" size={24} color="#fff" />
+                  <Text style={styles.analyzeButtonText}>Analyze Document</Text>
+                </>
+            )}
+          </TouchableOpacity>
+
+          {analyzing && (
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: `${uploadProgress}%` }]} />
+                </View>
+                <Text style={styles.progressText}>
+                  {uploadProgress < 50 ? 'Uploading document...' : 'AI is analyzing...'}
+                </Text>
+              </View>
+          )}
+        </View>
+      </ScrollView>
   );
 
   // Render Step 3: Results
   const renderResultsStep = () => (
-    <ScrollView style={styles.stepContent}>
-      <View style={styles.resultsCard}>
-        <View style={styles.resultsHeader}>
-          <Ionicons name="checkmark-circle" size={48} color="#4CAF50" />
-          <Text style={styles.resultsTitle}>Analysis Complete!</Text>
-          <Text style={styles.resultsSubtitle}>
-            Document analyzed in {analysisLanguage.charAt(0).toUpperCase() + analysisLanguage.slice(1)}
-          </Text>
+      <ScrollView
+          style={styles.stepContent}
+          contentContainerStyle={styles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.resultsCard}>
+          <View style={styles.resultsHeader}>
+            <Ionicons name="checkmark-circle" size={48} color="#4CAF50" />
+            <Text style={styles.resultsTitle}>Analysis Complete!</Text>
+            <Text style={styles.resultsSubtitle}>
+              Document analyzed in {analysisLanguage.charAt(0).toUpperCase() + analysisLanguage.slice(1)}
+            </Text>
+          </View>
+
+          {analysisResults?.explanation && (
+              <View style={styles.explanationSection}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons name="document-text-outline" size={24} color="#007AFF" />
+                  <Text style={styles.sectionTitle}>AI Explanation</Text>
+                </View>
+                <Text style={styles.explanationText}>{analysisResults.explanation}</Text>
+              </View>
+          )}
+
+          {(analysisResults?.wordCount || analysisResults?.confidence) && (
+              <View style={styles.statsContainer}>
+                {analysisResults.wordCount ? (
+                    <View style={styles.statBox}>
+                      <Ionicons name="text-outline" size={24} color="#FF9800" />
+                      <Text style={styles.statValue}>{analysisResults.wordCount}</Text>
+                      <Text style={styles.statLabel}>Words</Text>
+                    </View>
+                ) : null}
+
+                {analysisResults.characterCount ? (
+                    <View style={styles.statBox}>
+                      <Ionicons name="reader-outline" size={24} color="#2196F3" />
+                      <Text style={styles.statValue}>{analysisResults.characterCount}</Text>
+                      <Text style={styles.statLabel}>Characters</Text>
+                    </View>
+                ) : null}
+
+                {analysisResults.confidence ? (
+                    <View style={styles.statBox}>
+                      <Ionicons name="analytics-outline" size={24} color="#4CAF50" />
+                      <Text style={styles.statValue}>{Math.round(analysisResults.confidence * 100)}%</Text>
+                      <Text style={styles.statLabel}>Confidence</Text>
+                    </View>
+                ) : null}
+              </View>
+          )}
+
+          <TouchableOpacity style={styles.newAnalysisButton} onPress={handleReset}>
+            <Ionicons name="add-circle-outline" size={24} color="#007AFF" />
+            <Text style={styles.newAnalysisText}>Analyze Another Document</Text>
+          </TouchableOpacity>
         </View>
-
-        {analysisResults?.explanation && (
-          <View style={styles.explanationSection}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="document-text-outline" size={24} color="#007AFF" />
-              <Text style={styles.sectionTitle}>AI Explanation</Text>
-            </View>
-            <Text style={styles.explanationText}>{analysisResults.explanation}</Text>
-          </View>
-        )}
-
-        {(analysisResults?.wordCount || analysisResults?.confidence) && (
-          <View style={styles.statsContainer}>
-            {analysisResults.wordCount ? (
-              <View style={styles.statBox}>
-                <Ionicons name="text-outline" size={24} color="#FF9800" />
-                <Text style={styles.statValue}>{analysisResults.wordCount}</Text>
-                <Text style={styles.statLabel}>Words</Text>
-              </View>
-            ) : null}
-            
-            {analysisResults.characterCount ? (
-              <View style={styles.statBox}>
-                <Ionicons name="reader-outline" size={24} color="#2196F3" />
-                <Text style={styles.statValue}>{analysisResults.characterCount}</Text>
-                <Text style={styles.statLabel}>Characters</Text>
-              </View>
-            ) : null}
-
-            {analysisResults.confidence ? (
-              <View style={styles.statBox}>
-                <Ionicons name="analytics-outline" size={24} color="#4CAF50" />
-                <Text style={styles.statValue}>{Math.round(analysisResults.confidence * 100)}%</Text>
-                <Text style={styles.statLabel}>Confidence</Text>
-              </View>
-            ) : null}
-          </View>
-        )}
-
-        <TouchableOpacity style={styles.newAnalysisButton} onPress={handleReset}>
-          <Ionicons name="add-circle-outline" size={24} color="#007AFF" />
-          <Text style={styles.newAnalysisText}>Analyze Another Document</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
   );
 
   return (
-    <View style={styles.container}>
-      {/* Tab Selector */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'upload' && styles.tabActive]}
-          onPress={() => setActiveTab('upload')}
-        >
-          <Ionicons
-            name="cloud-upload-outline"
-            size={24}
-            color={activeTab === 'upload' ? '#007AFF' : '#666'}
-          />
-          <Text style={[styles.tabText, activeTab === 'upload' && styles.tabTextActive]}>
-            Upload & Analyze
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.container}>
+        {/* Tab Selector */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+              style={[styles.tab, activeTab === 'upload' && styles.tabActive]}
+              onPress={() => setActiveTab('upload')}
+          >
+            <Ionicons
+                name="cloud-upload-outline"
+                size={24}
+                color={activeTab === 'upload' ? '#007AFF' : '#666'}
+            />
+            <Text style={[styles.tabText, activeTab === 'upload' && styles.tabTextActive]}>
+              Upload & Analyze
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'history' && styles.tabActive]}
-          onPress={() => setActiveTab('history')}
-        >
-          <Ionicons
-            name="time-outline"
-            size={24}
-            color={activeTab === 'history' ? '#007AFF' : '#666'}
-          />
-          <Text style={[styles.tabText, activeTab === 'history' && styles.tabTextActive]}>
-            History
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+              style={[styles.tab, activeTab === 'history' && styles.tabActive]}
+              onPress={() => setActiveTab('history')}
+          >
+            <Ionicons
+                name="time-outline"
+                size={24}
+                color={activeTab === 'history' ? '#007AFF' : '#666'}
+            />
+            <Text style={[styles.tabText, activeTab === 'history' && styles.tabTextActive]}>
+              History
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Tab Content */}
-      {activeTab === 'upload' ? (
-        <>
-          {/* Back Button - Show when not on first step */}
-          {currentStep !== 'select' && !analyzing && (
-            <View style={styles.backButtonContainer}>
-              <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                <Ionicons name="arrow-back" size={24} color="#007AFF" />
-                <Text style={styles.backButtonText}>Back</Text>
-              </TouchableOpacity>
+        {/* Tab Content */}
+        {activeTab === 'upload' ? (
+            <View style={styles.uploadTabContent}>
+              {/* Back Button - Show when not on first step */}
+              {currentStep !== 'select' && !analyzing && (
+                  <View style={styles.backButtonContainer}>
+                    <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+                      <Ionicons name="arrow-back" size={24} color="#007AFF" />
+                      <Text style={styles.backButtonText}>Back</Text>
+                    </TouchableOpacity>
+                  </View>
+              )}
+
+              {renderStepIndicator()}
+
+              {/* Render current step */}
+              {currentStep === 'select' && renderSelectStep()}
+              {currentStep === 'configure' && renderConfigureStep()}
+              {currentStep === 'results' && renderResultsStep()}
             </View>
-          )}
-          
-          {renderStepIndicator()}
-          <View style={styles.content}>
-            {currentStep === 'select' && renderSelectStep()}
-            {currentStep === 'configure' && renderConfigureStep()}
-            {currentStep === 'results' && renderResultsStep()}
-          </View>
-        </>
-      ) : (
-        <DocumentHistory />
-      )}
-    </View>
+        ) : (
+            <DocumentHistory />
+        )}
+      </View>
   );
 }
 
@@ -421,6 +428,9 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     color: '#007AFF',
+  },
+  uploadTabContent: {
+    flex: 1,
   },
   backButtonContainer: {
     backgroundColor: '#fff',
@@ -476,11 +486,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     marginBottom: 32,
   },
-  content: {
-    flex: 1,
-  },
   stepContent: {
     flex: 1,
+  },
+  scrollContentContainer: {
+    flexGrow: 1,
     padding: 20,
   },
   uploadArea: {
@@ -488,6 +498,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 40,
+    minHeight: 400,
   },
   uploadTitle: {
     fontSize: 24,
@@ -523,6 +534,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 32,
     gap: 12,
+    maxWidth: '100%',
   },
   infoText: {
     flex: 1,
@@ -531,7 +543,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   configCard: {
-    flex: 1,
+    width: '100%',
   },
   fileInfoCard: {
     backgroundColor: '#fff',

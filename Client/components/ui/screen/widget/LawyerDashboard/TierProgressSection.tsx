@@ -49,7 +49,7 @@ const TierProgressSection = () => {
   // Fetch points function
   const fetchUserPoints = async () => {
     try {
-      const response = await axios.get(`${API_URL_ENV}/api/lawyers/${user.id}/tier`);
+      const response = await axios.get(`http://172.28.1.166:3000/api/lawyers/${user.id}/tier`);
       const lawyer = response.data;
 
       setTotalPoints(lawyer.totalPoints || 0);

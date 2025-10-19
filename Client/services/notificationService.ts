@@ -4,12 +4,12 @@ import { API_URL_ENV } from '@env';
 // Get API URL based on platform
 const getBaseUrl = () => {
   if (Platform.OS === 'web') {
-    return '${API_URL_ENV}/api';
+    return 'http://172.28.1.166:3000/api';
   } else if (Platform.OS === 'android') {
     // Try multiple URLs for Android
-    return '${API_URL_ENV}/api';
+    return 'http://172.28.1.166:3000/api';
   }
-  return '${API_URL_ENV}/api';
+  return 'http://172.28.1.166:3000/api';
 };
 
 const BASE_URL = getBaseUrl();

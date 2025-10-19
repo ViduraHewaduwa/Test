@@ -13,7 +13,7 @@ import { API_URL_ENV } from '@env';
 // Configure base URL - using fixed network IP for mobile environment
 const getApiBaseUrl = () => {
   // Always use the mobile network IP
-  return `${API_URL_ENV}/api`;
+  return `http://172.28.1.166:3000/api`;
 };
 
 const API_BASE_URL = getApiBaseUrl();

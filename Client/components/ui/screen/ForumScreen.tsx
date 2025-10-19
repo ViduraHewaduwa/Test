@@ -223,20 +223,20 @@ const ForumsScreen = () => {
   const getApiUrls = () => {
       if (Platform.OS === 'web') {
           return [
-              `${API_URL_ENV}/api`,
-              `${API_URL_ENV}/api`,
+              `http://172.28.1.166:3000/api`,
+              `http://172.28.1.166:3000/api`,
           ];
       } else if (Platform.OS === 'android') {
           return [
-              `${API_URL_ENV}/api`,     // Android emulator
-              `${API_URL_ENV}/api`,    // Your computer's IP
-              `${API_URL_ENV}/api`,    // Fallback
+              `http://172.28.1.166:3000/api`,     // Android emulator
+              `http://172.28.1.166:3000/api`,    // Your computer's IP
+              `http://172.28.1.166:3000/api`,    // Fallback
           ];
       } else {
           // iOS simulator
           return [
-              `${API_URL_ENV}/api`,    // Your computer's IP
-              `${API_URL_ENV}/api`,    // iOS simulator
+              `http://172.28.1.166:3000/api`,    // Your computer's IP
+              `http://172.28.1.166:3000/api`,    // iOS simulator
           ];
       }
   };

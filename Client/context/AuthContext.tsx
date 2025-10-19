@@ -145,7 +145,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   //   }
   // };
   const getApiUrls = () => {
-    const localIp = `${API_URL_ENV}/api/auth`;
+    const localIp = `http://172.28.1.166:3000/api/auth`;
     return [localIp];
   };
 
