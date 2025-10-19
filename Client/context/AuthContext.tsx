@@ -1,13 +1,19 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { Platform } from 'react-native';
-import { API_URL_ENV } from '@env';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { Platform } from "react-native";
+import { API_URL_ENV } from "@env";
 
 interface User {
   id: string;
   email: string;
-  role: 'user' | 'lawyer' | 'ngo';
+  role: "user" | "lawyer" | "ngo";
   status: string;
   createdAt: string;
   updatedAt?: string;
@@ -32,7 +38,7 @@ interface User {
 interface RegisterData {
   email: string;
   password: string;
-  role: 'user' | 'lawyer' | 'ngo';
+  role: "user" | "lawyer" | "ngo";
   // User-specific fields
   birthday?: string;
   genderSpectrum?: string;
@@ -74,16 +80,23 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  register: (userData: RegisterData) => Promise<{ success: boolean; user: User }>;
-  login: (email: string, password: string) => Promise<{ success: boolean; user: User }>;
+  register: (
+    userData: RegisterData
+  ) => Promise<{ success: boolean; user: User }>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; user: User }>;
   logout: () => Promise<void>;
   getCurrentUser: (authToken?: string) => Promise<User>;
-  updateProfile: (profileData: ProfileData) => Promise<{ success: boolean; user: User }>;
+  updateProfile: (
+    profileData: ProfileData
+  ) => Promise<{ success: boolean; user: User }>;
   // Role-based helper functions
   isUser: () => boolean;
   isLawyer: () => boolean;
   isNgo: () => boolean;
-  hasRole: (role: 'user' | 'lawyer' | 'ngo') => boolean;
+  hasRole: (role: "user" | "lawyer" | "ngo") => boolean;
   getUserDisplayName: () => string;
   getUserTypeLabel: () => string;
   getProfileRoute: () => string;
@@ -95,7 +108,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -132,9 +145,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   //   }
   // };
   const getApiUrls = () => {
-  const localIp = `${API_URL_ENV}/api/auth`; 
-  return [localIp];
-};
+    const localIp = `${API_URL_ENV}/api/auth`;
+    return [localIp];
+  };
 
   // For Android emulator, use 10.0.2.2 instead of localhost
   // For iOS simulator, localhost should work
@@ -184,24 +197,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = React.useCallback(async (): Promise<void> => {
     try {
-      console.log('[AuthContext] Starting logout process...');
-      console.log('[AuthContext] Current auth state - isAuthenticated:', isAuthenticated, 'user:', !!user);
-      
+      console.log("[AuthContext] Starting logout process...");
+      console.log(
+        "[AuthContext] Current auth state - isAuthenticated:",
+        isAuthenticated,
+        "user:",
+        !!user
+      );
+
       // Clear stored token
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userRole');
-      console.log('[AuthContext] Token removed from storage');
-      
+      await AsyncStorage.removeItem("userToken");
+      await AsyncStorage.removeItem("userRole");
+      console.log("[AuthContext] Token removed from storage");
+
       // Clear context state
       setToken(null);
       setUser(null);
       setIsAuthenticated(false);
       setHasCheckedAuth(false); // Reset flag to allow re-checking auth state
-      
-      console.log('[AuthContext] Auth state cleared - isAuthenticated set to false');
-      console.log('[AuthContext] Logout completed successfully');
+
+      console.log(
+        "[AuthContext] Auth state cleared - isAuthenticated set to false"
+      );
+      console.log("[AuthContext] Logout completed successfully");
     } catch (error) {
-      console.error('[AuthContext] Logout error:', error);
+      console.error("[AuthContext] Logout error:", error);
       // Even if there's an error clearing storage, we should still clear the context state
       setToken(null);
       setUser(null);
@@ -210,59 +230,96 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [isAuthenticated, user]);
 
-  const getCurrentUser = React.useCallback(async (authToken: string = token || ''): Promise<User> => {
+  const getCurrentUser = React.useCallback(
+  async (authToken: string = token || ''): Promise<User> => {
     try {
       const response = await axios.get(`${API_BASE_URL}/profile`, {
         headers: {
-          Authorization: `Bearer ${authToken}`
-        }
+          Authorization: `Bearer ${authToken}`,
+        },
+        timeout: 10000, // ⏱️ increase timeout to 10 seconds
       });
+
       if (response.data.success) {
         setUser(response.data.user);
         setIsAuthenticated(true);
         return response.data.user;
       }
+
       throw new Error('Failed to get user profile');
     } catch (err) {
       const error = err as any;
-      console.error('Error getting current user:', error?.response?.data || error?.message || error);
-      logout();
+
+      // 🔹 Detect network errors or timeouts separately
+      if (
+        error.code === 'ECONNABORTED' ||
+        error.message?.toLowerCase().includes('timeout') ||
+        error.message?.toLowerCase().includes('network error')
+      ) {
+        console.warn(
+          '[AuthContext] Network issue detected (timeout or unreachable). Skipping logout.'
+        );
+        // Don't log out — just warn, user remains logged in
+        return user as User; // Keep existing user if any
+      }
+
+      // 🔹 Token-related errors → logout
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('[AuthContext] Invalid token detected — logging out.');
+        await logout();
+      }
+
+      console.error(
+        'Error getting current user:',
+        error?.response?.data || error?.message || error
+      );
+
       throw err;
     }
-  }, [token, logout, API_BASE_URL]);
-
+  },
+  [token, logout, API_BASE_URL, user]
+);
   const checkAuthState = React.useCallback(async () => {
-
-    const storedToken = await AsyncStorage.getItem('userToken');
-const storedRole = await AsyncStorage.getItem('userRole');
-if (storedToken && storedRole) {
-  setToken(storedToken);
-  setUser(prev => prev ? { ...prev, role: storedRole as User['role'] } : null);
-}
+    const storedToken = await AsyncStorage.getItem("userToken");
+    const storedRole = await AsyncStorage.getItem("userRole");
+    if (storedToken && storedRole) {
+      setToken(storedToken);
+      setUser((prev) =>
+        prev ? { ...prev, role: storedRole as User["role"] } : null
+      );
+    }
     // Prevent multiple executions
     if (hasCheckedAuth) {
       return;
     }
-    
+
     try {
-      console.log('[AuthContext] checkAuthState: Checking authentication state...');
-      const storedToken = await AsyncStorage.getItem('userToken');
-      
+      console.log(
+        "[AuthContext] checkAuthState: Checking authentication state..."
+      );
+      const storedToken = await AsyncStorage.getItem("userToken");
+
       if (storedToken) {
-        console.log('[AuthContext] checkAuthState: Token found, validating...');
+        console.log("[AuthContext] checkAuthState: Token found, validating...");
         setToken(storedToken);
         try {
           await getCurrentUser(storedToken);
-          console.log('[AuthContext] checkAuthState: User authenticated successfully');
+          console.log(
+            "[AuthContext] checkAuthState: User authenticated successfully"
+          );
         } catch {
-          console.log('[AuthContext] checkAuthState: Token validation failed, logging out');
+          console.log(
+            "[AuthContext] checkAuthState: Token validation failed, logging out"
+          );
           // If token is invalid, logout will be called from getCurrentUser
         }
       } else {
-        console.log('[AuthContext] checkAuthState: No stored token, user not authenticated');
+        console.log(
+          "[AuthContext] checkAuthState: No stored token, user not authenticated"
+        );
       }
     } catch (error) {
-      console.error('[AuthContext] Error checking auth state:', error);
+      console.error("[AuthContext] Error checking auth state:", error);
     } finally {
       setIsLoading(false);
       setHasCheckedAuth(true);
@@ -271,213 +328,251 @@ if (storedToken && storedRole) {
 
   // Check for existing token on app start
   useEffect(() => {
-  checkAuthState();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []); // ✅ only run once when app starts
+    checkAuthState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ✅ only run once when app starts
 
-  const register = async (userData: RegisterData): Promise<{ success: boolean; user: User }> => {
+  const register = async (
+    userData: RegisterData
+  ): Promise<{ success: boolean; user: User }> => {
     console.log(`[AuthContext] register: attempting with ${API_BASE_URL}`);
-    
+
     const attemptRegister = async (url: string) => {
       const response = await axios.post(`${url}/register`, userData);
       return response;
     };
 
     let lastError: any;
-    
+
     // Try current URL first, then fallbacks
     for (let i = 0; i < API_URLS.length; i++) {
       try {
         const currentUrl = API_URLS[(currentApiIndex + i) % API_URLS.length];
         console.log(`[AuthContext] register: trying ${currentUrl}`);
-        
+
         const response = await attemptRegister(currentUrl);
-        
+
         if (response.data.success) {
           // Update to successful URL index
           setCurrentApiIndex((currentApiIndex + i) % API_URLS.length);
-          
+
           const { token: newToken, user: newUser } = response.data;
-          await AsyncStorage.setItem('userToken', newToken);
-          await AsyncStorage.setItem('userRole', newUser.role);
+          await AsyncStorage.setItem("userToken", newToken);
+          await AsyncStorage.setItem("userRole", newUser.role);
           setToken(newToken);
           setUser(newUser);
           setIsAuthenticated(true);
           setHasCheckedAuth(true);
-          
-          console.log('[AuthContext] register: success with', currentUrl);
+
+          console.log("[AuthContext] register: success with", currentUrl);
           return { success: true, user: newUser };
         }
-        throw new Error('Registration failed');
+        throw new Error("Registration failed");
       } catch (error: any) {
-        console.error(`[AuthContext] register error with ${API_URLS[(currentApiIndex + i) % API_URLS.length]}:`, error.response?.data || error.message || error);
+        console.error(
+          `[AuthContext] register error with ${
+            API_URLS[(currentApiIndex + i) % API_URLS.length]
+          }:`,
+          error.response?.data || error.message || error
+        );
         lastError = error;
-        
+
         // If it's a network error, try next URL
-        if (error.code === 'NETWORK_ERROR' || error.message?.includes('Network Error') || !error.response) {
+        if (
+          error.code === "NETWORK_ERROR" ||
+          error.message?.includes("Network Error") ||
+          !error.response
+        ) {
           continue;
         }
-        
+
         // If it's an authentication error (4xx), don't try other URLs
         if (error.response?.status >= 400 && error.response?.status < 500) {
           break;
         }
       }
     }
-    
-    const message = lastError?.response?.data?.message || 'Registration failed - unable to connect to server';
+
+    const message =
+      lastError?.response?.data?.message ||
+      "Registration failed - unable to connect to server";
     throw new Error(message);
   };
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; user: User }> => {
-    
-    
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; user: User }> => {
     const attemptLogin = async (url: string) => {
       const response = await axios.post(`${url}/login`, {
         email,
-        password
+        password,
       });
       return response;
     };
 
     let lastError: any;
-    
+
     // Try current URL first, then fallbacks
     for (let i = 0; i < API_URLS.length; i++) {
       try {
         const currentUrl = API_URLS[(currentApiIndex + i) % API_URLS.length];
-       
-        
+
         const response = await attemptLogin(currentUrl);
-        
+
         if (response.data.success) {
           // Update to successful URL index
           setCurrentApiIndex((currentApiIndex + i) % API_URLS.length);
-          
+
           const { token: newToken, user: newUser } = response.data;
-          await AsyncStorage.setItem('userToken', newToken);
-          await AsyncStorage.setItem('userRole', newUser.role);
+          await AsyncStorage.setItem("userToken", newToken);
+          await AsyncStorage.setItem("userRole", newUser.role);
 
           setToken(newToken);
           setUser(newUser);
-          
+
           setIsAuthenticated(true);
           setHasCheckedAuth(true);
-          
-          
+
           return { success: true, user: newUser };
         }
-        throw new Error('Login failed');
+        throw new Error("Login failed");
       } catch (error: any) {
-        console.error(`[AuthContext] login error with ${API_URLS[(currentApiIndex + i) % API_URLS.length]}:`, error.response?.data || error.message || error);
+        console.error(
+          `[AuthContext] login error with ${
+            API_URLS[(currentApiIndex + i) % API_URLS.length]
+          }:`,
+          error.response?.data || error.message || error
+        );
         lastError = error;
-        
+
         // If it's a network error, try next URL
-        if (error.code === 'NETWORK_ERROR' || error.message?.includes('Network Error') || !error.response) {
+        if (
+          error.code === "NETWORK_ERROR" ||
+          error.message?.includes("Network Error") ||
+          !error.response
+        ) {
           continue;
         }
-        
+
         // If it's an authentication error (4xx), don't try other URLs
         if (error.response?.status >= 400 && error.response?.status < 500) {
           break;
         }
       }
     }
-    
-    const message = lastError?.response?.data?.message || 'Login failed - unable to connect to server';
+
+    const message =
+      lastError?.response?.data?.message ||
+      "Login failed - unable to connect to server";
     throw new Error(message);
   };
 
-  const updateProfile = async (profileData: ProfileData): Promise<{ success: boolean; user: User }> => {
+  const updateProfile = async (
+    profileData: ProfileData
+  ): Promise<{ success: boolean; user: User }> => {
     try {
-  // console.log('[AuthContext] updateProfile: profileData:', profileData);
+      // console.log('[AuthContext] updateProfile: profileData:', profileData);
       const response = await axios.put(`${API_BASE_URL}/profile`, profileData);
-  // console.log('[AuthContext] updateProfile: API response:', response.data);
+      // console.log('[AuthContext] updateProfile: API response:', response.data);
       if (response.data.success) {
         setUser(response.data.user);
         return { success: true, user: response.data.user };
       }
-      throw new Error('Profile update failed');
+      throw new Error("Profile update failed");
     } catch (error: any) {
-      console.error('Update profile error:', error.response?.data || error.message || error);
-      const message = error.response?.data?.message || 'Profile update failed';
+      console.error(
+        "Update profile error:",
+        error.response?.data || error.message || error
+      );
+      const message = error.response?.data?.message || "Profile update failed";
       throw new Error(message);
     }
   };
 
   // Role-based helper functions
   const isUser = (): boolean => {
-    return user?.role === 'user';
+    return user?.role === "user";
   };
 
   const isLawyer = (): boolean => {
-    return user?.role === 'lawyer';
+    return user?.role === "lawyer";
   };
 
   const isNgo = (): boolean => {
-    return user?.role === 'ngo';
+    return user?.role === "ngo";
   };
 
-  const hasRole = (role: 'user' | 'lawyer' | 'ngo'): boolean => {
+  const hasRole = (role: "user" | "lawyer" | "ngo"): boolean => {
     return user?.role === role;
   };
 
   // Additional helper functions for role-based functionality
   const getUserDisplayName = (): string => {
-    if (!user) return 'User';
-    
+    if (!user) return "User";
+
     switch (user.role) {
-      case 'lawyer':
-        return user.firstName && user.lastName 
+      case "lawyer":
+        return user.firstName && user.lastName
           ? `${user.firstName} ${user.lastName}`
           : user.email;
-      case 'ngo':
+      case "ngo":
         return user.organizationName || user.email;
-      case 'user':
+      case "user":
       default:
         return user.email;
     }
   };
 
   const getUserTypeLabel = (): string => {
-    if (!user) return 'User';
+    if (!user) return "User";
     switch (user.role) {
-      case 'user':
-        return 'Regular User';
-      case 'lawyer':
-        return 'Legal Professional';
-      case 'ngo':
-        return 'NGO Representative';
+      case "user":
+        return "Regular User";
+      case "lawyer":
+        return "Legal Professional";
+      case "ngo":
+        return "NGO Representative";
       default:
-        return 'User';
+        return "User";
     }
   };
 
   const getProfileRoute = (): string => {
-    if (!user) return 'UserProfile';
-    
+    if (!user) return "UserProfile";
+
     switch (user.role) {
-      case 'user':
-        return 'UserProfile';
-      case 'lawyer':
-        return 'LawyerOwnProfile';
-      case 'ngo':
-        return 'NgoOwnProfile';
+      case "user":
+        return "UserProfile";
+      case "lawyer":
+        return "LawyerOwnProfile";
+      case "ngo":
+        return "NgoOwnProfile";
       default:
-        return 'UserProfile';
+        return "UserProfile";
     }
   };
 
   const isProfileComplete = (): boolean => {
     if (!user) return false;
-    
+
     switch (user.role) {
-      case 'user':
+      case "user":
         return !!(user.birthday && user.genderSpectrum);
-      case 'lawyer':
-        return !!(user.firstName && user.lastName && user.specialization && user.contactNumber);
-      case 'ngo':
-        return !!(user.organizationName && user.description && user.category && user.contact);
+      case "lawyer":
+        return !!(
+          user.firstName &&
+          user.lastName &&
+          user.specialization &&
+          user.contactNumber
+        );
+      case "ngo":
+        return !!(
+          user.organizationName &&
+          user.description &&
+          user.category &&
+          user.contact
+        );
       default:
         return false;
     }
@@ -500,12 +595,8 @@ if (storedToken && storedRole) {
     getUserDisplayName,
     getUserTypeLabel,
     getProfileRoute,
-    isProfileComplete
+    isProfileComplete,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
