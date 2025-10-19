@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { useTheme } from "../../../../../context/ThemeContext";
 import { getClientsForLawyer } from "../../../../../service/appointmentSercive"; // ✅ import the new service
 import { useAuth } from "../../../../../context/AuthContext"; // assuming you have lawyerId here
@@ -28,46 +35,65 @@ const ClientListSection = () => {
 
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.white }]}>
+      <View
+        style={[styles.loadingContainer, { backgroundColor: colors.white }]}
+      >
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={{ color: colors.primary, marginTop: 8 }}>Loading clients...</Text>
+        <Text style={{ color: colors.primary, marginTop: 8 }}>
+          Loading clients...
+        </Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.white, shadowColor: colors.shadow }]}>
-      <Text style={[styles.sectionTitle, { color: colors.primary }]}>Client List</Text>
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: colors.white, shadowColor: colors.shadow },
+      ]}
+    >
+      <Text style={[styles.sectionTitle, { color: colors.primary }]}>
+        Client List
+      </Text>
 
       {clients.length === 0 ? (
         <Text style={{ color: colors.secondary }}>No clients found.</Text>
       ) : (
         <FlatList
-  data={clients}
-  keyExtractor={(item, index) => item._id ? item._id : index.toString()}
-  renderItem={({ item, index }) => (
-    <View
-      key={item._id ? item._id : index.toString()} // ✅ add key here
-      style={[styles.clientCard, { backgroundColor: colors.light }]}
-    >
-      <View>
-        <Text style={[styles.clientName, { color: colors.primary }]}>
-          {item.firstName} {item.lastName}
-        </Text>
-        <Text style={[styles.contact, { color: colors.tertiary }]}>
-          📧 {item.email || "No email"}
-        </Text>
-        <Text style={[styles.contact, { color: colors.tertiary }]}>
-          📞 {item.contactNumber || "No contact"}
-        </Text>
-      </View>
-      <TouchableOpacity style={[styles.messageButton, { backgroundColor: colors.accent }]}>
-        <Text style={[styles.messageText, { color: colors.white }]}>Message</Text>
-      </TouchableOpacity>
-    </View>
-  )}
-/>
-
+          data={clients}
+          keyExtractor={(item, index) =>
+            item._id ? item._id : index.toString()
+          }
+          renderItem={({ item, index }) => (
+            <View
+              key={item._id ? item._id : index.toString()} // ✅ add key here
+              style={[styles.clientCard, { backgroundColor: colors.light }]}
+            >
+              <View>
+                <Text style={[styles.clientName, { color: colors.primary }]}>
+                  {item.firstName} {item.lastName}
+                </Text>
+                <Text style={[styles.contact, { color: colors.tertiary }]}>
+                  📧 {item.email || "No email"}
+                </Text>
+                <Text style={[styles.contact, { color: colors.tertiary }]}>
+                  📞 {item.contactNumber || "No contact"}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.messageButton,
+                  { backgroundColor: colors.accent },
+                ]}
+              >
+                <Text style={[styles.messageText, { color: colors.white }]}>
+                  Message
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
       )}
     </View>
   );
@@ -87,28 +113,28 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 12,
   },
   clientCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     borderRadius: 12,
     padding: 12,
     marginBottom: 10,
   },
-  clientName: { fontSize: 16, fontWeight: '600' },
+  clientName: { fontSize: 16, fontWeight: "600" },
   contact: { fontSize: 13, marginTop: 3 },
   messageButton: {
     borderRadius: 8,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
-  messageText: { fontWeight: '600' },
+  messageText: { fontWeight: "600" },
   loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
     borderRadius: 16,
     elevation: 3,

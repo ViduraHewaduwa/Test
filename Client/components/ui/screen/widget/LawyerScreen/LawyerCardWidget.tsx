@@ -56,26 +56,13 @@ const LawyerCardWidget = ({
     `${item?.firstName || ""} ${item?.lastName || ""}`.trim() || "No Name";
   const specialization = item?.specialization || "Not Specified";
   const rating = item?.rating || 0;
-  const status = item?.lawyerStatus || "pending";
   const experience = item?.experience || 0;
   const logoUri =
-  item?.profile?.profilePicture && item.profile.profilePicture.trim() !== ""
-    ? item.profile.profilePicture
-    : "https://via.placeholder.com/100";
+    item?.profile?.profilePicture && item.profile.profilePicture.trim() !== ""
+      ? item.profile.profilePicture
+      : "https://via.placeholder.com/100";
   const tierName = item?.tier || "Community Ally";
   const tierData = getTierData(tierName);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "accepted":
-        return "#4CAF50";
-      case "rejected":
-        return "#FF3B30";
-      case "pending":
-      default:
-        return "#FFA500";
-    }
-  };
 
   if (isGridView) {
     return (
@@ -91,7 +78,6 @@ const LawyerCardWidget = ({
         <Text style={styles.gridSpecialization} numberOfLines={1}>
           {specialization}
         </Text>
-        
 
         {/* Tier Display */}
         <View style={styles.tierContainer}>
@@ -108,25 +94,13 @@ const LawyerCardWidget = ({
         <View style={styles.gridRatingContainer}>{renderStars(rating)}</View>
 
         <View style={styles.gridButtonContainer}>
-          
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: colors.secondary}]}
+            style={[styles.button, { backgroundColor: colors.accent }]}
             onPress={() => onBook && onBook(item)}
           >
             <MaterialIcons name="event-available" size={16} color="#fff" />
             <Text style={styles.buttonText}>Book</Text>
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.gridStatusBadge}>
-          <Text
-            style={[
-              styles.gridStatusText,
-              { color: getStatusColor(status) },
-            ]}
-          >
-            {status}
-          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -171,26 +145,14 @@ const LawyerCardWidget = ({
           </View>
 
           <View style={styles.listButtonContainer}>
-            
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: colors.secondary}]}
+              style={[styles.button, { backgroundColor: colors.accent }]}
               onPress={() => onBook && onBook(item)}
             >
               <MaterialIcons name="event-available" size={16} color="#fff" />
               <Text style={styles.buttonText}>Book</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        <View style={styles.statusBadge}>
-          <Text
-            style={[
-              styles.statusText,
-              { color: getStatusColor(status) },
-            ]}
-          >
-            {status}
-          </Text>
         </View>
       </View>
     </TouchableOpacity>
